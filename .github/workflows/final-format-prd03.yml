@@ -1,0 +1,31 @@
+name: PRD-03 Final Format Fix
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  format-one:
+    if: ${{ !contains(github.event.head_commit.message, '[prd03-final-format]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --global npm@10.9.2
+      - run: npm ci
+      - name: Format exact remaining file
+        run: |
+          test "$(./node_modules/.bin/prettier --version)" = "3.9.6"
+          ./node_modules/.bin/prettier --write src/application/save/saveService.ts
+          git diff --check
+          test "$(git diff --name-only)" = "src/application/save/saveService.ts"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/application/save/saveService.ts
+          git commit -m "style: finalize PRD-03 Prettier output [prd03-final-format]"
+          git push
