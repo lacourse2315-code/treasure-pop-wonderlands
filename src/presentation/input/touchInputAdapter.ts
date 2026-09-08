@@ -1,5 +1,12 @@
 import type { PlayerCommandBus, PlayerCommand } from '../../domain/input/playerCommand';
 
+const MOVEMENT_COMMANDS = new Set<PlayerCommand>([
+  'move-up',
+  'move-down',
+  'move-left',
+  'move-right',
+]);
+
 export class TouchInputAdapter {
   private readonly activePointers = new Map<number, PlayerCommand>();
 
@@ -40,7 +47,11 @@ export class TouchInputAdapter {
     if (!command) return;
     event.preventDefault();
     this.activePointers.delete(event.pointerId);
-    this.bus.emitState(command, false);
+    if (MOVEMENT_COMMANDS.has(command)) {
+      window.setTimeout(() => this.bus.emitState(command, false), 80);
+    } else {
+      this.bus.emitState(command, false);
+    }
   };
 
   private commandFrom(event: PointerEvent): PlayerCommand | undefined {
