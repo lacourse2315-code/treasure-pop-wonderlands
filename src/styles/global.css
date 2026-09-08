@@ -157,6 +157,9 @@ input:focus-visible {
   background: #10131a;
   border: 3px solid #fff;
 }
+.pause-panel[hidden] {
+  display: none;
+}
 #portrait-gate {
   display: none;
 }
