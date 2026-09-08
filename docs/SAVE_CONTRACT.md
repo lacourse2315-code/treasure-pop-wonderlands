@@ -1,22 +1,21 @@
-# Save Contract Foundation — PRD-02
+# Save Contract — PRD-03
 
-## Canonical V1 direction
+IndexedDB is the authoritative local V1 save store. Saves are keyed by `profileId + slot`, so one child's data cannot be selected as another child's save.
 
-- Multiple independent local child profiles.
-- IndexedDB will be the authoritative local persistence layer when implemented.
-- `localStorage` may hold only tiny preferences or recovery hints where appropriate.
-- Save schemas are versioned and migrated; old valid saves are not reset simply because the application changes.
-- Recovery chain: `current → previous → lastKnownGood`.
-- New saves must eventually be validated, checksummed, written transactionally, re-read, and verified before becoming authoritative.
+## Schema
 
-## Explicit non-guarantee
+The current schema is explicitly V1. Unknown future versions, missing versions, malformed payloads, invalid timestamps, invalid profile ownership, and checksum mismatches are rejected. The migration boundary is intentionally ready for future V1 → V2 → V3 work, but PRD-03 does not invent migrations that do not yet exist.
 
-IndexedDB cannot guarantee permanent survival after browser data deletion, app deletion, device loss, full storage loss, or changing devices. Future documentation must not claim otherwise.
+## Transaction / recovery policy
+
+Each IndexedDB slot write uses a read-write transaction. The application service follows: validate next save → preserve valid current as previous → write current → re-read and validate current → promote verified current to lastKnownGood. Loading checks `current → previous → lastKnownGood` and never crosses profile IDs.
+
+Profile deletion calls `deleteProfile`, deleting all three slots deterministically.
+
+## Non-guarantees
+
+IndexedDB is local persistence, not cloud backup. Browser-data deletion, uninstall, complete storage cleanup, physical device loss, or changing devices can destroy local data.
 
 ## Future parent transfer seam
 
-A future authorized milestone may implement **Parent Save Export / Import**. PRD-02 defines only the `ParentSaveTransferPort` interface; it does not implement export/import, cloud sync, accounts, or networking.
-
-## V1 network policy
-
-No cloud save is required for V1. Gameplay must not depend on a network save service.
+`ParentSaveTransferPort` remains an architectural boundary only. Export/import is not implemented in PRD-03.
