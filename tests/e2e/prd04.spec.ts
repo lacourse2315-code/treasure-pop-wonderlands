@@ -17,7 +17,9 @@ test('desktop Chromium proves profile, movement, interaction, pause, reload, and
   await expect(page.locator('#progress-output')).toContainText('0');
   const before = Number(await page.locator('html').getAttribute('data-player-x'));
   await page.keyboard.down('ArrowRight');
-  await page.waitForFunction(() => document.documentElement.dataset.interactionRange === 'in-range');
+  await page.waitForFunction(
+    () => document.documentElement.dataset.interactionRange === 'in-range',
+  );
   await page.keyboard.up('ArrowRight');
   const after = Number(await page.locator('html').getAttribute('data-player-x'));
   expect(after).toBeGreaterThan(before);
