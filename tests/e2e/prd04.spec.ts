@@ -68,9 +68,10 @@ test('mobile WebKit uses real touch controls for movement, interaction, pause, a
   await page.locator('#play-profile').tap();
   const before = Number(await page.locator('html').getAttribute('data-player-x'));
   const right = page.getByRole('button', { name: 'Move right' });
-  await right.dispatchEvent('pointerdown', { pointerType: 'touch', pointerId: 7 });
-  await page.waitForTimeout(420);
-  await right.dispatchEvent('pointerup', { pointerType: 'touch', pointerId: 7 });
+  for (let index = 0; index < 4; index += 1) {
+    await right.tap();
+    await page.waitForTimeout(100);
+  }
   const after = Number(await page.locator('html').getAttribute('data-player-x'));
   expect(after).toBeGreaterThan(before);
   await page.locator('#touch-interact').tap();
