@@ -86,7 +86,7 @@ export function startDevelopmentHarness(game: Phaser.Game): void {
       output.value = `Technical interactions: ${String(progress.technicalInteractionsCompleted)}`;
   };
   window.addEventListener('wonderlands:pause-changed', (event) => {
-    setPausePanel(Boolean((event as CustomEvent<boolean>).detail));
+    setPausePanel((event as CustomEvent<boolean>).detail);
   });
   window.addEventListener('wonderlands:progress-changed', updateProgress);
   renderProfiles();
