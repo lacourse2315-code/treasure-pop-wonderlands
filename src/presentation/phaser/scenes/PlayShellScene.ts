@@ -1,6 +1,9 @@
 import Phaser from 'phaser';
 import { getRuntime } from '../../../application/runtime/runtimeBridge';
-import { createInteractionTargetId, isInteractionInRange } from '../../../domain/gameplay/interaction';
+import {
+  createInteractionTargetId,
+  isInteractionInRange,
+} from '../../../domain/gameplay/interaction';
 import { moveWithinBounds, type Point } from '../../../domain/gameplay/playerMovement';
 
 const WORLD_WIDTH = 1800;
@@ -28,7 +31,13 @@ export class PlayShellScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#182335');
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     this.add.rectangle(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, WORLD_WIDTH, WORLD_HEIGHT, 0x182335);
-    this.add.rectangle(OBSTACLE.centerX, OBSTACLE.centerY, OBSTACLE.width, OBSTACLE.height, 0x5f6875);
+    this.add.rectangle(
+      OBSTACLE.centerX,
+      OBSTACLE.centerY,
+      OBSTACLE.width,
+      OBSTACLE.height,
+      0x5f6875,
+    );
     this.beacon = this.add.rectangle(TARGET.position.x, TARGET.position.y, 64, 64, 0xf4c95d);
     this.player = this.add.circle(this.position.x, this.position.y, PLAYER_RADIUS, 0x62d4ff);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);

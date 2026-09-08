@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test('desktop Chromium proves profile, movement, interaction, pause, reload, and profile separation', async ({ page }, testInfo) => {
+test('desktop Chromium proves profile, movement, interaction, pause, reload, and profile separation', async ({
+  page,
+}, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-chromium');
   const errors: string[] = [];
   page.on('console', (message) => {
@@ -51,7 +53,9 @@ test('Firefox launches the real Play Shell without runtime errors', async ({ pag
   expect(errors).toEqual([]);
 });
 
-test('mobile WebKit uses real touch controls for movement, interaction, pause, and persistence', async ({ page }, testInfo) => {
+test('mobile WebKit uses real touch controls for movement, interaction, pause, and persistence', async ({
+  page,
+}, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile-landscape-webkit');
   const errors: string[] = [];
   page.on('console', (message) => {
@@ -77,6 +81,12 @@ test('mobile WebKit uses real touch controls for movement, interaction, pause, a
   await page.reload();
   await page.locator('#play-profile').tap();
   await expect(page.locator('#progress-output')).toContainText('1');
-  expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight && document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(
+    await page.evaluate(
+      () =>
+        document.documentElement.scrollHeight <= innerHeight &&
+        document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
   expect(errors).toEqual([]);
 });

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createInteractionTargetId, isInteractionInRange } from '../../src/domain/gameplay/interaction';
+import {
+  createInteractionTargetId,
+  isInteractionInRange,
+} from '../../src/domain/gameplay/interaction';
 import { moveWithinBounds, normalizeMovement } from '../../src/domain/gameplay/playerMovement';
 import { PlayerCommandBus } from '../../src/domain/input/playerCommand';
 import { PlayerInputState } from '../../src/domain/input/playerInputState';

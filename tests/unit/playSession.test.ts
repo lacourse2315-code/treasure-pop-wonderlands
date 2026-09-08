@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { PlaySession } from '../../src/application/play/playSession';
-import { createSaveEnvelope, type SaveEnvelopeV1, type SaveStorePort } from '../../src/domain/save/saveContract';
+import {
+  createSaveEnvelope,
+  type SaveEnvelopeV1,
+  type SaveStorePort,
+} from '../../src/domain/save/saveContract';
 import { ProfileRegistry } from '../../src/domain/profiles/profileRegistry';
 import type { ProfileId } from '../../src/domain/profiles/profile';
 import { SaveService } from '../../src/application/save/saveService';
@@ -40,7 +44,10 @@ describe('PRD-04 play session persistence', () => {
     const other = registry.create('Other');
     const store = new MemoryStore();
     const service = new SaveService(store);
-    await service.save(profile.profileId, createSaveEnvelope(profile, { technicalInteractionsCompleted: 3, activatedTargetIds: ['a'] }));
+    await service.save(
+      profile.profileId,
+      createSaveEnvelope(profile, { technicalInteractionsCompleted: 3, activatedTargetIds: ['a'] }),
+    );
     const first = new PlaySession(profile, service);
     const second = new PlaySession(other, service);
     expect((await first.load()).technicalInteractionsCompleted).toBe(3);

@@ -1,11 +1,5 @@
 export type PlayerCommand =
-  | 'move-up'
-  | 'move-down'
-  | 'move-left'
-  | 'move-right'
-  | 'primary-action'
-  | 'back'
-  | 'pause-menu';
+  'move-up' | 'move-down' | 'move-left' | 'move-right' | 'primary-action' | 'back' | 'pause-menu';
 export type CommandListener = (command: PlayerCommand) => void;
 export type CommandStateListener = (command: PlayerCommand, active: boolean) => void;
 
