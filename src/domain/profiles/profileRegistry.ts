@@ -23,7 +23,7 @@ export class ProfileRegistry {
     const error = validateProfileName(displayName);
     if (error) throw new Error(error);
     if (this.profiles.size >= MAX_LOCAL_PROFILES)
-      throw new Error(`Local profile limit (${MAX_LOCAL_PROFILES}) reached.`);
+      throw new Error(`Local profile limit (${String(MAX_LOCAL_PROFILES)}) reached.`);
     const profile: ChildProfile = {
       profileId: createProfileId(),
       displayName: normalizeProfileName(displayName),
@@ -32,7 +32,7 @@ export class ProfileRegistry {
       saveSchemaVersion: CURRENT_SAVE_SCHEMA_VERSION,
     };
     this.profiles.set(profile.profileId, profile);
-    if (!this.activeProfileId) this.activeProfileId = profile.profileId;
+    this.activeProfileId ??= profile.profileId;
     return profile;
   }
 

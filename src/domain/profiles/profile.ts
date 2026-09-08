@@ -15,7 +15,7 @@ export function validateProfileName(name: string): string | null {
   const normalized = name.trim();
   if (normalized.length === 0) return 'Profile name is required.';
   if (normalized.length > MAX_PROFILE_NAME_LENGTH)
-    return `Profile name must be ${MAX_PROFILE_NAME_LENGTH} characters or fewer.`;
+    return `Profile name must be ${String(MAX_PROFILE_NAME_LENGTH)} characters or fewer.`;
   return null;
 }
 

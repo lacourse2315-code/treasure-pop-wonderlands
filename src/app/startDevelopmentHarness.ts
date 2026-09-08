@@ -43,23 +43,27 @@ export function startDevelopmentHarness(): void {
         render();
       }),
     );
-    root.querySelector('#save-progress')?.addEventListener('click', async () => {
-      const profile = registry.getActive();
-      const input = root.querySelector<HTMLInputElement>('#progress-value');
-      if (!profile || !input) return;
-      await saves.save(
-        profile.profileId,
-        createSaveEnvelope(profile, { progressValue: Number(input.value) }),
-      );
-      root.dataset.saveStatus = 'saved';
+    root.querySelector('#save-progress')?.addEventListener('click', () => {
+      void (async () => {
+        const profile = registry.getActive();
+        const input = root.querySelector<HTMLInputElement>('#progress-value');
+        if (!profile || !input) return;
+        await saves.save(
+          profile.profileId,
+          createSaveEnvelope(profile, { progressValue: Number(input.value) }),
+        );
+        root.dataset.saveStatus = 'saved';
+      })();
     });
-    root.querySelector('#load-progress')?.addEventListener('click', async () => {
-      const profile = registry.getActive();
-      if (!profile) return;
-      const loaded = await saves.load(profile.profileId);
-      const output = root.querySelector<HTMLOutputElement>('#save-output');
-      if (output) output.value = JSON.stringify(loaded.save?.payload ?? null);
-      root.dataset.saveStatus = loaded.save ? 'loaded' : 'empty';
+    root.querySelector('#load-progress')?.addEventListener('click', () => {
+      void (async () => {
+        const profile = registry.getActive();
+        if (!profile) return;
+        const loaded = await saves.load(profile.profileId);
+        const output = root.querySelector<HTMLOutputElement>('#save-output');
+        if (output) output.value = JSON.stringify(loaded.save?.payload ?? null);
+        root.dataset.saveStatus = loaded.save ? 'loaded' : 'empty';
+      })();
     });
   };
   render();

@@ -18,17 +18,19 @@ const profile = (id: string): ChildProfile => ({
 });
 class MemoryStore implements SaveStorePort {
   private values = new Map<string, SaveEnvelopeV1>();
-  async read(id: ProfileId, slot: SaveSlot) {
-    return this.values.get(`${id}:${slot}`) ?? null;
+  read(id: ProfileId, slot: SaveSlot): Promise<SaveEnvelopeV1 | null> {
+    return Promise.resolve(this.values.get(`${id}:${slot}`) ?? null);
   }
-  async write(id: ProfileId, slot: SaveSlot, save: SaveEnvelopeV1) {
+  write(id: ProfileId, slot: SaveSlot, save: SaveEnvelopeV1): Promise<void> {
     this.values.set(`${id}:${slot}`, save);
+    return Promise.resolve();
   }
-  async deleteProfile(id: ProfileId) {
+  deleteProfile(id: ProfileId): Promise<void> {
     for (const slot of ['current', 'previous', 'lastKnownGood'] as const)
       this.values.delete(`${id}:${slot}`);
+    return Promise.resolve();
   }
-  corrupt(id: ProfileId, slot: SaveSlot) {
+  corrupt(id: ProfileId, slot: SaveSlot): void {
     const save = this.values.get(`${id}:${slot}`);
     if (save) this.values.set(`${id}:${slot}`, { ...save, checksum: 'corrupt' });
   }

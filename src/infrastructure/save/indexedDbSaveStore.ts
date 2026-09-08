@@ -20,9 +20,11 @@ interface StoredSave {
 export class IndexedDbSaveStore implements SaveStorePort {
   public async read(profileId: ProfileId, slot: SaveSlot): Promise<SaveEnvelopeV1 | null> {
     const db = await openDatabase();
-    const row = await request<StoredSave | undefined>(
-      db.transaction(STORE, 'readonly').objectStore(STORE).get(key(profileId, slot)),
-    );
+    const getRequest = db
+      .transaction(STORE, 'readonly')
+      .objectStore(STORE)
+      .get(key(profileId, slot)) as IDBRequest<StoredSave | undefined>;
+    const row = await request(getRequest);
     db.close();
     if (!row) return null;
     return validateSaveEnvelope(row.save, profileId).valid ? row.save : null;

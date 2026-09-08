@@ -24,7 +24,8 @@ describe('profile registry', () => {
   });
   it('enforces the local profile limit', () => {
     const registry = new ProfileRegistry();
-    for (let index = 0; index < MAX_LOCAL_PROFILES; index += 1) registry.create(`P${index}`);
+    for (let index = 0; index < MAX_LOCAL_PROFILES; index += 1)
+      registry.create(`P${String(index)}`);
     expect(() => registry.create('extra')).toThrow();
   });
   it('removes profiles deterministically', () => {

@@ -44,6 +44,8 @@ test('profile save survives reload in real IndexedDB and keyboard emits command'
   await page.keyboard.press('ArrowLeft');
   await expect(page.locator('#dev-harness')).toHaveAttribute('data-last-command', 'move-left');
   const profileId = await page.locator('.profile-choice').first().getAttribute('data-profile-id');
+  expect(profileId).not.toBeNull();
+  if (!profileId) throw new Error('Expected a profile id.');
   await page.reload();
   await page.locator('#profile-name').fill('Alex Reload');
   await page.locator('#create-profile').click();
@@ -52,12 +54,12 @@ test('profile save survives reload in real IndexedDB and keyboard emits command'
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
         const request = indexedDB.open('treasure-pop-wonderlands');
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        request.onerror = () => reject(request.error ?? new Error('IndexedDB open failed.'));
       });
       const row = await new Promise<unknown>((resolve, reject) => {
         const request = db.transaction('saves').objectStore('saves').get(`${profileId}:current`);
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        request.onerror = () => reject(request.error ?? new Error('IndexedDB read failed.'));
       });
       db.close();
       (window as unknown as { __prd03Persisted?: unknown }).__prd03Persisted = row;
@@ -83,6 +85,8 @@ test('mobile WebKit persists IndexedDB and touch emits same semantic command', a
   await page.locator('#progress-value').fill('7');
   await page.locator('#save-progress').click();
   const id = await page.locator('.profile-choice').first().getAttribute('data-profile-id');
+  expect(id).not.toBeNull();
+  if (!id) throw new Error('Expected a profile id.');
   await page.locator('[data-player-command="primary-action"]').tap();
   await expect(page.locator('#dev-harness')).toHaveAttribute('data-last-command', 'primary-action');
   await page.reload();
@@ -91,12 +95,12 @@ test('mobile WebKit persists IndexedDB and touch emits same semantic command', a
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
         const request = indexedDB.open('treasure-pop-wonderlands');
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        request.onerror = () => reject(request.error ?? new Error('IndexedDB open failed.'));
       });
       const row = await new Promise<unknown>((resolve, reject) => {
         const request = db.transaction('saves').objectStore('saves').get(`${id}:current`);
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        request.onerror = () => reject(request.error ?? new Error('IndexedDB read failed.'));
       });
       db.close();
       return Boolean(row);
