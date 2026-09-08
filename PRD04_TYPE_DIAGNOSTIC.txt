@@ -1,0 +1,5 @@
+
+> treasure-pop-wonderlands@0.0.0-prd03 typecheck
+> tsc --noEmit
+
+src/presentation/phaser/scenes/PlayShellScene.ts(55,10): error TS4114: This member must have an 'override' modifier because it overrides a member in the base class 'Scene'.
