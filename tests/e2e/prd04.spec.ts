@@ -17,7 +17,7 @@ test('desktop Chromium proves profile, movement, interaction, pause, reload, and
   await expect(page.locator('#progress-output')).toContainText('0');
   const before = Number(await page.locator('html').getAttribute('data-player-x'));
   await page.keyboard.down('ArrowRight');
-  await page.waitForTimeout(420);
+  await page.waitForFunction(() => document.documentElement.dataset.interactionRange === 'in-range');
   await page.keyboard.up('ArrowRight');
   const after = Number(await page.locator('html').getAttribute('data-player-x'));
   expect(after).toBeGreaterThan(before);
@@ -68,10 +68,12 @@ test('mobile WebKit uses real touch controls for movement, interaction, pause, a
   await page.locator('#play-profile').tap();
   const before = Number(await page.locator('html').getAttribute('data-player-x'));
   const right = page.getByRole('button', { name: 'Move right' });
-  for (let index = 0; index < 4; index += 1) {
+  for (let index = 0; index < 10; index += 1) {
+    if ((await page.locator('html').getAttribute('data-interaction-range')) === 'in-range') break;
     await right.tap();
     await page.waitForTimeout(100);
   }
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-range', 'in-range');
   const after = Number(await page.locator('html').getAttribute('data-player-x'));
   expect(after).toBeGreaterThan(before);
   await page.locator('#touch-interact').tap();
