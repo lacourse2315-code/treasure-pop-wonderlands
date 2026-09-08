@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   qa:
@@ -33,30 +33,11 @@ jobs:
           npm --version
           test "$(npm --version)" = "10.9.2"
 
-      - name: Refresh real package-lock.json
-        run: npm install --package-lock-only --ignore-scripts --legacy-peer-deps
-
-      - name: Reset dependencies before npm ci
-        run: rm -rf node_modules
-
-      - name: Clean install from lockfile
+      - name: Clean install from committed lockfile
         run: npm ci
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium firefox webkit
-
-      - name: Apply canonical Prettier formatting
-        run: npm run format
-
-      - name: Commit generated lockfile and formatting
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: refresh PRD-02B lockfile and formatting"
-            git push
-          fi
 
       - name: Format check
         run: npm run format:check
