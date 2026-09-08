@@ -24,19 +24,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Generate real package-lock.json
-        run: |
-          npm --version
-          npm install --ignore-scripts
-
-      - name: Preserve generated lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-lock
-          path: package-lock.json
-          if-no-files-found: error
-
-      - name: Pin npm 10.9.2 for canonical validation
+      - name: Pin npm 10.9.2
         run: npm install --global npm@10.9.2
 
       - name: Verify Node and npm
@@ -44,6 +32,16 @@ jobs:
           node --version
           npm --version
           test "$(npm --version)" = "10.9.2"
+
+      - name: Generate real package-lock.json
+        run: npm install --package-lock-only --ignore-scripts --legacy-peer-deps
+
+      - name: Preserve generated lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-lock
+          path: package-lock.json
+          if-no-files-found: error
 
       - name: Reset dependencies before npm ci
         run: rm -rf node_modules
