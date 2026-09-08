@@ -1,0 +1,64 @@
+name: PRD-03 Format Extraction
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --global npm@10.9.2
+      - run: npm ci
+      - name: Format PRD-03 files with exact project Prettier
+        run: |
+          test "$(./node_modules/.bin/prettier --version)" = "3.9.6"
+          ./node_modules/.bin/prettier --write \
+            package.json \
+            src/app/startDevelopmentHarness.ts \
+            src/application/save/saveService.ts \
+            src/domain/input/playerCommand.ts \
+            src/domain/profiles/profile.ts \
+            src/domain/profiles/profileRegistry.ts \
+            src/domain/save/saveContract.ts \
+            src/infrastructure/save/indexedDbSaveStore.ts \
+            src/presentation/input/keyboardInputAdapter.ts \
+            src/presentation/input/touchInputAdapter.ts \
+            src/styles/global.css \
+            tests/e2e/foundation.spec.ts \
+            tests/unit/inputCommands.test.ts \
+            tests/unit/profileRegistry.test.ts \
+            tests/unit/saveSystem.test.ts
+      - name: Verify only expected files changed
+        run: |
+          git diff --name-only > changed-files.txt
+          cat changed-files.txt
+          test "$(wc -l < changed-files.txt)" -eq 15
+      - uses: actions/upload-artifact@v4
+        with:
+          name: prd03-prettier-3.9.6
+          path: |
+            package.json
+            src/app/startDevelopmentHarness.ts
+            src/application/save/saveService.ts
+            src/domain/input/playerCommand.ts
+            src/domain/profiles/profile.ts
+            src/domain/profiles/profileRegistry.ts
+            src/domain/save/saveContract.ts
+            src/infrastructure/save/indexedDbSaveStore.ts
+            src/presentation/input/keyboardInputAdapter.ts
+            src/presentation/input/touchInputAdapter.ts
+            src/styles/global.css
+            tests/e2e/foundation.spec.ts
+            tests/unit/inputCommands.test.ts
+            tests/unit/profileRegistry.test.ts
+            tests/unit/saveSystem.test.ts
+            changed-files.txt
