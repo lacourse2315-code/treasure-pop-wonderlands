@@ -1,5 +1,6 @@
-node_modules
-dist
-coverage
-playwright-report
-test-results
+dist/
+node_modules/
+playwright-report/
+test-results/
+PRD-02_REPORT.md
+PRD-02B_REPORT.md

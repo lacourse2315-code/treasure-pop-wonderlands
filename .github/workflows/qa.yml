@@ -1,4 +1,4 @@
-name: Wonderlands PRD-02B QA
+name: Wonderlands PRD-03 QA
 
 on:
   push:
@@ -11,51 +11,38 @@ permissions:
 
 jobs:
   qa:
-    name: PRD-02B foundation QA
+    name: PRD-03 player foundation QA
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
       - name: Checkout Wonderlands
         uses: actions/checkout@v4
-
       - name: Set up Node 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Pin npm 10.9.2
         run: npm install --global npm@10.9.2
-
       - name: Verify Node and npm
         run: |
           node --version
           npm --version
           test "$(npm --version)" = "10.9.2"
-
       - name: Clean install from committed lockfile
         run: npm ci
-
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium firefox webkit
-
       - name: Format check
         run: npm run format:check
-
       - name: Lint
         run: npm run lint
-
       - name: Typecheck
         run: npm run typecheck
-
-      - name: Unit tests
+      - name: Unit and integration tests
         run: npm run test
-
       - name: Build
         run: npm run build
-
       - name: End-to-end tests
         run: npm run test:e2e
-
       - name: Aggregate QA
         run: npm run qa
