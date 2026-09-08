@@ -1,0 +1,28 @@
+name: PRD-04 temporary E2E diagnostics
+on:
+  push:
+    paths:
+      - '.github/workflows/prd04-e2e-diagnose.yml'
+permissions:
+  contents: write
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm install --global npm@10.9.2
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run test:e2e > PRD04_E2E_DIAGNOSTIC.txt 2>&1 || true
+      - run: |
+          git config user.name 'lacourse2315-code'
+          git config user.email 'lacourse2315@gmail.com'
+          git add PRD04_E2E_DIAGNOSTIC.txt
+          git commit -m 'chore: capture final PRD-04 E2E diagnostics'
+          git push origin HEAD:main
