@@ -14,6 +14,10 @@ export interface SaveEnvelopeV1 {
   readonly checksum: string;
 }
 
+export type SaveEnvelopeCandidate = Omit<SaveEnvelopeV1, 'schemaVersion'> & {
+  readonly schemaVersion: number;
+};
+
 export interface SaveValidationResult {
   readonly valid: boolean;
   readonly errors: readonly string[];
@@ -29,7 +33,7 @@ export interface ParentSaveTransferPort {
   importProfile(file: Blob): Promise<ProfileId>;
 }
 
-export function validateSaveEnvelope(value: SaveEnvelopeV1): SaveValidationResult {
+export function validateSaveEnvelope(value: SaveEnvelopeCandidate): SaveValidationResult {
   const errors: string[] = [];
 
   if (value.schemaVersion !== CURRENT_SAVE_SCHEMA_VERSION) {
