@@ -41,6 +41,8 @@ test('desktop Chromium keeps the PRD-03 IndexedDB foundation through the PRD-04 
   await page.locator('#profile-name').fill('Alex');
   await page.locator('#create-profile').click();
   await page.locator('#play-profile').click();
+  await expect(page.locator('#progress-output')).toContainText('0');
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-range', 'out-of-range');
   await page.keyboard.down('ArrowRight');
   await page.waitForFunction(
     () => document.documentElement.dataset.interactionRange === 'in-range',
