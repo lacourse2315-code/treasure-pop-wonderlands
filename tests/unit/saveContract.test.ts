@@ -1,24 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import {
-  CURRENT_SAVE_SCHEMA_VERSION,
+  createSaveEnvelope,
   validateSaveEnvelope,
   type SaveEnvelopeV1,
 } from '../../src/domain/save/saveContract';
-import type { ProfileId } from '../../src/domain/profiles/profile';
+import type { ChildProfile, ProfileId } from '../../src/domain/profiles/profile';
 
-const validSave: SaveEnvelopeV1 = {
-  schemaVersion: CURRENT_SAVE_SCHEMA_VERSION,
-  contentVersion: '0.0.0-prd02',
-  profile: {
-    profileId: 'profile_local_1' as ProfileId,
-    displayName: 'Player',
-    createdAtIso: '2026-09-06T00:00:00.000Z',
-  },
-  playTimeSeconds: 0,
-  payload: {},
-  writtenAtIso: '2026-09-06T00:00:00.000Z',
-  checksum: 'foundation-test-checksum',
+const profile: ChildProfile = {
+  profileId: 'profile_local_1' as ProfileId,
+  displayName: 'Player',
+  createdAtIso: '2026-09-06T00:00:00.000Z',
+  lastUsedAtIso: '2026-09-06T00:00:00.000Z',
+  saveSchemaVersion: 1,
 };
+
+const validSave: SaveEnvelopeV1 = createSaveEnvelope(
+  profile,
+  {},
+  0,
+  '2026-09-06T00:00:00.000Z',
+);
 
 describe('save contract', () => {
   it('accepts a valid V1 save envelope', () => {
