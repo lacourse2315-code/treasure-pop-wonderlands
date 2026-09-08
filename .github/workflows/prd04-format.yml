@@ -1,0 +1,31 @@
+name: PRD-04 temporary formatter
+on:
+  push:
+    paths:
+      - '.github/workflows/prd04-format.yml'
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm install --global npm@10.9.2
+      - run: npm ci
+      - run: |
+          test "$(npx prettier --version)" = "3.9.6"
+          npm run format
+          git diff --check
+      - run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'lacourse2315-code'
+          git config user.email 'lacourse2315@gmail.com'
+          git add -A
+          git commit -m 'style: format PRD-04 closure'
+          git push origin HEAD:main
