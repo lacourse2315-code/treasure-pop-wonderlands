@@ -52,7 +52,7 @@ export class PlayShellScene extends Phaser.Scene {
     });
   }
 
-  public update(_time: number, delta: number): void {
+  public override update(_time: number, delta: number): void {
     const runtime = getRuntime();
     const session = runtime.getSession();
     if (!session) {
