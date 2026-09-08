@@ -14,12 +14,7 @@ const profile: ChildProfile = {
   saveSchemaVersion: 1,
 };
 
-const validSave: SaveEnvelopeV1 = createSaveEnvelope(
-  profile,
-  {},
-  0,
-  '2026-09-06T00:00:00.000Z',
-);
+const validSave: SaveEnvelopeV1 = createSaveEnvelope(profile, {}, 0, '2026-09-06T00:00:00.000Z');
 
 describe('save contract', () => {
   it('accepts a valid V1 save envelope', () => {
