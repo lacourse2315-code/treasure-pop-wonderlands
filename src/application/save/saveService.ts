@@ -22,9 +22,7 @@ export class SaveService {
     await this.store.write(profileId, 'lastKnownGood', verified);
   }
 
-  public async load(
-    profileId: ProfileId,
-  ): Promise<{
+  public async load(profileId: ProfileId): Promise<{
     save: SaveEnvelopeV1 | null;
     recoveredFrom: 'current' | 'previous' | 'lastKnownGood' | null;
   }> {
