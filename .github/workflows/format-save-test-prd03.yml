@@ -1,0 +1,31 @@
+name: PRD-03 Save Test Format Fix
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  format-one:
+    if: ${{ !contains(github.event.head_commit.message, '[prd03-save-test-format]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --global npm@10.9.2
+      - run: npm ci
+      - name: Format exact remaining test
+        run: |
+          test "$(./node_modules/.bin/prettier --version)" = "3.9.6"
+          ./node_modules/.bin/prettier --write tests/unit/saveContract.test.ts
+          git diff --check
+          test "$(git diff --name-only)" = "tests/unit/saveContract.test.ts"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/unit/saveContract.test.ts
+          git commit -m "style: format PRD-03 save contract test [prd03-save-test-format]"
+          git push
