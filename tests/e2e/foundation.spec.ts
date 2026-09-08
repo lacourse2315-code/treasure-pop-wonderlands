@@ -22,6 +22,7 @@ async function expectLandscapeFoundation(page: Page): Promise<void> {
 
   await expect(page.locator('#game-root canvas')).toBeVisible();
   await expect.poll(() => page.locator('html').getAttribute('data-wonderlands-boot')).toBe('ready');
+  await expect.poll(() => page.locator('html').getAttribute('data-phaser-version')).toBe('4.2.1');
 
   const metrics = await page.evaluate(() => ({
     bodyOverflow: getComputedStyle(document.body).overflow,
