@@ -1,72 +1,95 @@
-import { ProfileRegistry } from '../domain/profiles/profileRegistry';
-import { createSaveEnvelope } from '../domain/save/saveContract';
-import { PlayerCommandBus, type PlayerCommand } from '../domain/input/playerCommand';
-import { IndexedDbSaveStore } from '../infrastructure/save/indexedDbSaveStore';
-import { SaveService } from '../application/save/saveService';
+import type Phaser from 'phaser';
+import { getRuntime } from '../application/runtime/runtimeBridge';
+import type { ProfileId } from '../domain/profiles/profile';
 import { KeyboardInputAdapter } from '../presentation/input/keyboardInputAdapter';
 import { TouchInputAdapter } from '../presentation/input/touchInputAdapter';
+import type { PlayShellScene } from '../presentation/phaser/scenes/PlayShellScene';
 
-export function startDevelopmentHarness(): void {
+export function startDevelopmentHarness(game: Phaser.Game): void {
   const root = document.querySelector<HTMLElement>('#dev-harness');
   if (!root) return;
-  const registry = new ProfileRegistry();
-  const saves = new SaveService(new IndexedDbSaveStore());
-  const bus = new PlayerCommandBus();
-  const keyboard = new KeyboardInputAdapter(bus);
-  const touch = new TouchInputAdapter(bus, root);
+  const runtime = getRuntime();
+  const keyboard = new KeyboardInputAdapter(runtime.bus);
+  const touch = new TouchInputAdapter(runtime.bus, root);
   keyboard.start();
   touch.start();
-  let command: PlayerCommand | null = null;
-  bus.subscribe((next) => {
-    command = next;
-    root.dataset.lastCommand = next;
-    render();
-  });
 
-  const render = (): void => {
-    const profiles = registry.list();
-    const active = registry.getActive();
-    root.innerHTML = `<section class="dev-panel"><strong>DEVELOPMENT / NON-FINAL UI</strong><label>Profile name <input id="profile-name" maxlength="24" /></label><button id="create-profile">Create profile</button><div id="profiles">${profiles.map((profile) => `<button class="profile-choice" data-profile-id="${profile.profileId}">${escapeHtml(profile.displayName)}</button>`).join('')}</div><label>Progress value <input id="progress-value" inputmode="numeric" value="0" /></label><button id="save-progress">Save</button><button id="load-progress">Load</button><output id="save-output">active=${active?.displayName ?? 'none'}</output><div class="dev-touch"><button data-player-command="move-left">Left</button><button data-player-command="primary-action">Action</button><button data-player-command="move-right">Right</button></div><output id="command-output">command=${command ?? 'none'}</output></section>`;
+  const renderProfiles = (): void => {
+    runtime.clearSession();
+    root.dataset.screen = 'profiles';
+    const profiles = runtime.profiles.list();
+    const active = runtime.profiles.getActive();
+    root.innerHTML = `<section class="dev-panel" aria-label="Technical profile select"><strong>PROFILE SELECT — TECHNICAL UI</strong><p>No personal data. Temporary shell.</p><label>Profile name <input id="profile-name" maxlength="24" autocomplete="off" /></label><button id="create-profile">Create profile</button><div id="profiles">${profiles.map((profile) => `<article class="profile-row"><button class="profile-choice" data-profile-id="${profile.profileId}">${escapeHtml(profile.displayName)}${profile.profileId === active?.profileId ? ' — ACTIVE' : ''}</button><button class="rename-profile" data-profile-id="${profile.profileId}">Rename</button><button class="delete-profile" data-profile-id="${profile.profileId}">Delete</button></article>`).join('')}</div><button id="play-profile" ${active ? '' : 'disabled'}>Play active profile</button><output id="profile-status">${active ? `Active: ${escapeHtml(active.displayName)}` : 'Create or select a profile.'}</output></section>`;
     root.querySelector('#create-profile')?.addEventListener('click', () => {
       const input = root.querySelector<HTMLInputElement>('#profile-name');
       if (!input) return;
       try {
-        registry.create(input.value);
-        render();
+        runtime.profiles.create(input.value);
+        runtime.persistProfiles();
+        renderProfiles();
       } catch (error) {
         root.dataset.error = String(error);
       }
     });
     root.querySelectorAll<HTMLElement>('.profile-choice').forEach((button) =>
       button.addEventListener('click', () => {
-        registry.select(button.dataset.profileId as never);
-        render();
+        runtime.profiles.select(button.dataset.profileId as ProfileId);
+        runtime.persistProfiles();
+        renderProfiles();
       }),
     );
-    root.querySelector('#save-progress')?.addEventListener('click', () => {
-      void (async () => {
-        const profile = registry.getActive();
-        const input = root.querySelector<HTMLInputElement>('#progress-value');
-        if (!profile || !input) return;
-        await saves.save(
-          profile.profileId,
-          createSaveEnvelope(profile, { progressValue: Number(input.value) }),
-        );
-        root.dataset.saveStatus = 'saved';
-      })();
-    });
-    root.querySelector('#load-progress')?.addEventListener('click', () => {
-      void (async () => {
-        const profile = registry.getActive();
-        if (!profile) return;
-        const loaded = await saves.load(profile.profileId);
-        const output = root.querySelector<HTMLOutputElement>('#save-output');
-        if (output) output.value = JSON.stringify(loaded.save?.payload ?? null);
-        root.dataset.saveStatus = loaded.save ? 'loaded' : 'empty';
-      })();
-    });
+    root.querySelectorAll<HTMLElement>('.rename-profile').forEach((button) =>
+      button.addEventListener('click', () => {
+        const name = window.prompt('New profile name');
+        if (name === null) return;
+        runtime.profiles.rename(button.dataset.profileId as ProfileId, name);
+        runtime.persistProfiles();
+        renderProfiles();
+      }),
+    );
+    root.querySelectorAll<HTMLElement>('.delete-profile').forEach((button) =>
+      button.addEventListener('click', () => {
+        if (!window.confirm('Delete this local profile and its save?')) return;
+        const profileId = button.dataset.profileId as ProfileId;
+        runtime.profiles.remove(profileId);
+        runtime.persistProfiles();
+        void runtime.saves.deleteProfile(profileId);
+        renderProfiles();
+      }),
+    );
+    root.querySelector('#play-profile')?.addEventListener('click', () => void enterPlay());
   };
-  render();
+
+  const enterPlay = async (): Promise<void> => {
+    const session = await runtime.startActiveSession();
+    if (!session) return;
+    root.dataset.screen = 'play';
+    root.innerHTML = `<section class="play-hud" aria-label="Technical play controls"><div class="play-status"><strong>PLAY SHELL — ${escapeHtml(session.profile.displayName)}</strong><output id="progress-output"></output><output id="interaction-output">Approach the gold beacon and interact.</output></div><div class="touch-controls" aria-label="Touch controls"><div class="touch-dpad"><button aria-label="Move up" data-player-command="move-up">↑</button><button aria-label="Move left" data-player-command="move-left">←</button><button aria-label="Move down" data-player-command="move-down">↓</button><button aria-label="Move right" data-player-command="move-right">→</button></div><div class="touch-actions"><button id="touch-interact" data-player-command="primary-action">Interact</button><button id="touch-pause" data-player-command="pause-menu">Pause</button></div></div><div id="pause-panel" class="pause-panel" hidden><strong>PAUSED</strong><button id="resume-button">Resume</button><button id="profiles-button">Profile select</button></div></section>`;
+    updateProgress();
+    playScene().resumePlay();
+    root.querySelector('#resume-button')?.addEventListener('click', () => {
+      playScene().resumePlay();
+      setPausePanel(false);
+    });
+    root.querySelector('#profiles-button')?.addEventListener('click', renderProfiles);
+  };
+
+  const playScene = (): PlayShellScene => game.scene.getScene('PlayShellScene') as PlayShellScene;
+  const setPausePanel = (paused: boolean): void => {
+    const panel = root.querySelector<HTMLElement>('#pause-panel');
+    if (panel) panel.hidden = !paused;
+  };
+  const updateProgress = (): void => {
+    const output = root.querySelector<HTMLOutputElement>('#progress-output');
+    const progress = runtime.getSession()?.getProgress();
+    if (output && progress)
+      output.value = `Technical interactions: ${String(progress.technicalInteractionsCompleted)}`;
+  };
+  window.addEventListener('wonderlands:pause-changed', (event) => {
+    setPausePanel(Boolean((event as CustomEvent<boolean>).detail));
+  });
+  window.addEventListener('wonderlands:progress-changed', updateProgress);
+  renderProfiles();
 }
 
 function escapeHtml(value: string): string {

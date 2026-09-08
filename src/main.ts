@@ -1,6 +1,8 @@
 import './styles/global.css';
-import { startWonderlands } from './app/startWonderlands';
+import { WonderlandsRuntime, installRuntime } from './application/runtime/runtimeBridge';
 import { startDevelopmentHarness } from './app/startDevelopmentHarness';
+import { startWonderlands } from './app/startWonderlands';
 
-startWonderlands('game-root');
-startDevelopmentHarness();
+installRuntime(new WonderlandsRuntime());
+const game = startWonderlands('game-root');
+startDevelopmentHarness(game);

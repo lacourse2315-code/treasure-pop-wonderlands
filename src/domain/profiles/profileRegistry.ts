@@ -8,15 +8,31 @@ import {
   type ProfileId,
 } from './profile';
 
+export interface ProfileRegistrySnapshot {
+  readonly profiles: readonly ChildProfile[];
+  readonly activeProfileId: ProfileId | null;
+}
+
 export class ProfileRegistry {
   private readonly profiles = new Map<ProfileId, ChildProfile>();
   private activeProfileId: ProfileId | null = null;
 
+  public constructor(snapshot?: ProfileRegistrySnapshot) {
+    for (const profile of snapshot?.profiles ?? []) this.profiles.set(profile.profileId, profile);
+    if (snapshot?.activeProfileId && this.profiles.has(snapshot.activeProfileId))
+      this.activeProfileId = snapshot.activeProfileId;
+  }
+
   public list(): readonly ChildProfile[] {
     return [...this.profiles.values()];
   }
+
   public getActive(): ChildProfile | null {
     return this.activeProfileId ? (this.profiles.get(this.activeProfileId) ?? null) : null;
+  }
+
+  public snapshot(): ProfileRegistrySnapshot {
+    return { profiles: this.list(), activeProfileId: this.activeProfileId };
   }
 
   public create(displayName: string, nowIso = new Date().toISOString()): ChildProfile {
