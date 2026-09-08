@@ -1,0 +1,141 @@
+
+> treasure-pop-wonderlands@0.0.0-prd03 test:e2e
+> playwright test
+
+
+Running 21 tests using 2 workers
+
+  ✓   1 [desktop-chromium] › tests/e2e/foundation.spec.ts:31:1 › foundation remains healthy (3.9s)
+  -   3 [desktop-chromium] › tests/e2e/foundation.spec.ts:79:1 › mobile WebKit keeps real touch and IndexedDB foundation
+  ✓   4 [desktop-chromium] › tests/e2e/foundation.spec.ts:94:1 › portrait gate remains valid (2.6s)
+  ✘   2 [desktop-chromium] › tests/e2e/foundation.spec.ts:35:1 › desktop Chromium keeps the PRD-03 IndexedDB foundation through the PRD-04 flow (11.1s)
+  -   6 [desktop-chromium] › tests/e2e/prd04.spec.ts:43:1 › Firefox launches the real Play Shell without runtime errors
+  -   7 [desktop-chromium] › tests/e2e/prd04.spec.ts:56:1 › mobile WebKit uses real touch controls for movement, interaction, pause, and persistence
+  ✓   8 [desktop-firefox] › tests/e2e/foundation.spec.ts:31:1 › foundation remains healthy (3.8s)
+  -   9 [desktop-firefox] › tests/e2e/foundation.spec.ts:35:1 › desktop Chromium keeps the PRD-03 IndexedDB foundation through the PRD-04 flow
+  -  10 [desktop-firefox] › tests/e2e/foundation.spec.ts:79:1 › mobile WebKit keeps real touch and IndexedDB foundation
+  ✓  11 [desktop-firefox] › tests/e2e/foundation.spec.ts:94:1 › portrait gate remains valid (1.6s)
+  ✘   5 [desktop-chromium] › tests/e2e/prd04.spec.ts:3:1 › desktop Chromium proves profile, movement, interaction, pause, reload, and profile separation (14.0s)
+  -  12 [desktop-firefox] › tests/e2e/prd04.spec.ts:3:1 › desktop Chromium proves profile, movement, interaction, pause, reload, and profile separation
+  -  13 [desktop-firefox] › tests/e2e/prd04.spec.ts:56:1 › mobile WebKit uses real touch controls for movement, interaction, pause, and persistence
+  ✓  14 [desktop-firefox] › tests/e2e/prd04.spec.ts:43:1 › Firefox launches the real Play Shell without runtime errors (2.3s)
+  -  16 [mobile-landscape-webkit] › tests/e2e/foundation.spec.ts:35:1 › desktop Chromium keeps the PRD-03 IndexedDB foundation through the PRD-04 flow
+  ✓  17 [mobile-landscape-webkit] › tests/e2e/foundation.spec.ts:79:1 › mobile WebKit keeps real touch and IndexedDB foundation (2.9s)
+  ✓  18 [mobile-landscape-webkit] › tests/e2e/foundation.spec.ts:94:1 › portrait gate remains valid (1.8s)
+  -  19 [mobile-landscape-webkit] › tests/e2e/prd04.spec.ts:3:1 › desktop Chromium proves profile, movement, interaction, pause, reload, and profile separation
+  ✓  15 [mobile-landscape-webkit] › tests/e2e/foundation.spec.ts:31:1 › foundation remains healthy (9.4s)
+  -  20 [mobile-landscape-webkit] › tests/e2e/prd04.spec.ts:43:1 › Firefox launches the real Play Shell without runtime errors
+  ✘  21 [mobile-landscape-webkit] › tests/e2e/prd04.spec.ts:56:1 › mobile WebKit uses real touch controls for movement, interaction, pause, and persistence (7.9s)
+
+
+  1) [desktop-chromium] › tests/e2e/foundation.spec.ts:35:1 › desktop Chromium keeps the PRD-03 IndexedDB foundation through the PRD-04 flow 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#progress-output')
+    Expected substring: "1"
+    Received string:    "Technical interactions: 0"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" locator('#progress-output') with timeout 5000ms
+      - waiting for locator('#progress-output')
+        13 × locator resolved to <output id="progress-output">Technical interactions: 0</output>
+           - unexpected value "Technical interactions: 0"
+
+
+      46 |   await page.keyboard.up('ArrowRight');
+      47 |   await page.keyboard.press('Space');
+    > 48 |   await expect(page.locator('#progress-output')).toContainText('1');
+         |                                                  ^
+      49 |   const profileId = await page.locator('html').evaluate(() => {
+      50 |     const raw = localStorage.getItem('wonderlands.profile-registry.v1');
+      51 |     if (!raw) return null;
+        at /home/runner/work/treasure-pop-wonderlands/treasure-pop-wonderlands/tests/e2e/foundation.spec.ts:48:50
+
+    Error Context: test-results/foundation-desktop-Chromiu-e4d56-ion-through-the-PRD-04-flow-desktop-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/foundation-desktop-Chromiu-e4d56-ion-through-the-PRD-04-flow-desktop-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/foundation-desktop-Chromiu-e4d56-ion-through-the-PRD-04-flow-desktop-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [desktop-chromium] › tests/e2e/prd04.spec.ts:3:1 › desktop Chromium proves profile, movement, interaction, pause, reload, and profile separation 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#progress-output')
+    Expected substring: "1"
+    Received string:    "Technical interactions: 0"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" locator('#progress-output') with timeout 5000ms
+      - waiting for locator('#progress-output')
+        13 × locator resolved to <output id="progress-output">Technical interactions: 0</output>
+           - unexpected value "Technical interactions: 0"
+
+
+      23 |   expect(after).toBeGreaterThan(before);
+      24 |   await page.keyboard.press('Space');
+    > 25 |   await expect(page.locator('#progress-output')).toContainText('1');
+         |                                                  ^
+      26 |   await page.keyboard.press('Escape');
+      27 |   await expect(page.locator('#pause-panel')).toBeVisible();
+      28 |   await page.locator('#resume-button').click();
+        at /home/runner/work/treasure-pop-wonderlands/treasure-pop-wonderlands/tests/e2e/prd04.spec.ts:25:50
+
+    Error Context: test-results/prd04-desktop-Chromium-pro-16cba-load-and-profile-separation-desktop-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/prd04-desktop-Chromium-pro-16cba-load-and-profile-separation-desktop-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/prd04-desktop-Chromium-pro-16cba-load-and-profile-separation-desktop-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [mobile-landscape-webkit] › tests/e2e/prd04.spec.ts:56:1 › mobile WebKit uses real touch controls for movement, interaction, pause, and persistence 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#progress-output')
+    Expected substring: "1"
+    Received string:    "Technical interactions: 0"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" locator('#progress-output') with timeout 5000ms
+      - waiting for locator('#progress-output')
+        14 × locator resolved to <output id="progress-output">Technical interactions: 0</output>
+           - unexpected value "Technical interactions: 0"
+
+
+      76 |   expect(after).toBeGreaterThan(before);
+      77 |   await page.locator('#touch-interact').tap();
+    > 78 |   await expect(page.locator('#progress-output')).toContainText('1');
+         |                                                  ^
+      79 |   await page.locator('#touch-pause').tap();
+      80 |   await expect(page.locator('#pause-panel')).toBeVisible();
+      81 |   await page.locator('#resume-button').tap();
+        at /home/runner/work/treasure-pop-wonderlands/treasure-pop-wonderlands/tests/e2e/prd04.spec.ts:78:50
+
+    Error Context: test-results/prd04-mobile-WebKit-uses-r-c6984-ction-pause-and-persistence-mobile-landscape-webkit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/prd04-mobile-WebKit-uses-r-c6984-ction-pause-and-persistence-mobile-landscape-webkit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/prd04-mobile-WebKit-uses-r-c6984-ction-pause-and-persistence-mobile-landscape-webkit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3 failed
+    [desktop-chromium] › tests/e2e/foundation.spec.ts:35:1 › desktop Chromium keeps the PRD-03 IndexedDB foundation through the PRD-04 flow 
+    [desktop-chromium] › tests/e2e/prd04.spec.ts:3:1 › desktop Chromium proves profile, movement, interaction, pause, reload, and profile separation 
+    [mobile-landscape-webkit] › tests/e2e/prd04.spec.ts:56:1 › mobile WebKit uses real touch controls for movement, interaction, pause, and persistence 
+  10 skipped
+  8 passed (43.6s)
