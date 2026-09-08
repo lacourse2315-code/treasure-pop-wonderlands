@@ -53,10 +53,16 @@ test('landscape foundation boots Phaser without document scrolling or browser er
   await expectLandscapeFoundation(page);
 });
 
-test('touch is enabled in the mobile WebKit landscape project', async ({ page }, testInfo) => {
+test('touch input is available in the mobile WebKit landscape project', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile-landscape-webkit', 'Mobile WebKit-only assertion.');
   await page.goto('/');
-  expect(await page.evaluate(() => navigator.maxTouchPoints > 0)).toBe(true);
+  await expect(page.locator('#game-root canvas')).toBeVisible();
+
+  const canvas = page.locator('#game-root canvas');
+  const box = await canvas.boundingBox();
+  expect(box).not.toBeNull();
+
+  await page.touchscreen.tap((box?.x ?? 0) + 1, (box?.y ?? 0) + 1);
 });
 
 test('portrait gate hides the game surface and remains inside the viewport', async ({ page }) => {
