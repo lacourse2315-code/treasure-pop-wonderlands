@@ -53,7 +53,9 @@ test('landscape foundation boots Phaser without document scrolling or browser er
   await expectLandscapeFoundation(page);
 });
 
-test('touch input is available in the mobile WebKit landscape project', async ({ page }, testInfo) => {
+test('touch input is available in the mobile WebKit landscape project', async ({
+  page,
+}, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile-landscape-webkit', 'Mobile WebKit-only assertion.');
   await page.goto('/');
   await expect(page.locator('#game-root canvas')).toBeVisible();
