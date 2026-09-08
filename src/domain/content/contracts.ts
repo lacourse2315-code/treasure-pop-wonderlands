@@ -1,15 +1,7 @@
 export type ContentId = string & { readonly __contentId: unique symbol };
 
 export type ContentKind =
-  | 'realm'
-  | 'zone'
-  | 'quest'
-  | 'npc'
-  | 'reward'
-  | 'companion'
-  | 'item'
-  | 'asset'
-  | 'localization';
+  'realm' | 'zone' | 'quest' | 'npc' | 'reward' | 'companion' | 'item' | 'asset' | 'localization';
 
 export interface ContentReference {
   readonly fromKind: ContentKind;

@@ -1,4 +1,5 @@
 # TREASURE POP — WONDERLANDS
+
 ## PRD-02 — FOUNDATION CONTRACTS & PROJECT SHELL — EXECUTION REPORT
 
 ### FILES CREATED / MODIFIED
@@ -16,9 +17,11 @@ Explicitly absent: realms, Pip, avatar, quests/content instances, final assets, 
 ### DEPENDENCIES + EXACT VERSIONS
 
 Runtime:
+
 - `phaser` = `4.2.1` exact.
 
 Development:
+
 - `@eslint/js` = `10.0.1` exact.
 - `@playwright/test` = `1.63.0` exact.
 - `eslint` = `10.10.0` exact.

@@ -47,7 +47,9 @@ async function expectLandscapeFoundation(page: Page): Promise<void> {
   expect(consoleErrors).toEqual([]);
 }
 
-test('landscape foundation boots Phaser without document scrolling or browser errors', async ({ page }) => {
+test('landscape foundation boots Phaser without document scrolling or browser errors', async ({
+  page,
+}) => {
   await expectLandscapeFoundation(page);
 });
 
