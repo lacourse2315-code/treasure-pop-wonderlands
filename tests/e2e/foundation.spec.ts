@@ -55,20 +55,23 @@ test('desktop Chromium keeps the PRD-03 IndexedDB foundation through the PRD-04 
   expect(profileId).not.toBeNull();
   if (!profileId) throw new Error('Expected a profile id.');
   await page.reload();
-  const exists = await page.evaluate(async ({ profileId }) => {
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open('treasure-pop-wonderlands');
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error ?? new Error('IndexedDB open failed.'));
-    });
-    const row = await new Promise<unknown>((resolve, reject) => {
-      const request = db.transaction('saves').objectStore('saves').get(`${profileId}:current`);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error ?? new Error('IndexedDB read failed.'));
-    });
-    db.close();
-    return Boolean(row);
-  }, { profileId });
+  const exists = await page.evaluate(
+    async ({ profileId }) => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open('treasure-pop-wonderlands');
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error ?? new Error('IndexedDB open failed.'));
+      });
+      const row = await new Promise<unknown>((resolve, reject) => {
+        const request = db.transaction('saves').objectStore('saves').get(`${profileId}:current`);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error ?? new Error('IndexedDB read failed.'));
+      });
+      db.close();
+      return Boolean(row);
+    },
+    { profileId },
+  );
   expect(exists).toBe(true);
   expect(errors).toEqual([]);
 });
