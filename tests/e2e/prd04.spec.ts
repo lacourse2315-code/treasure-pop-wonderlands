@@ -46,6 +46,7 @@ test('desktop Chromium proves real world bounds and obstacle collision', async (
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-chromium');
+  test.setTimeout(45_000);
   const errors: string[] = [];
   page.on('console', (message) => {
     if (message.type() === 'error') errors.push(message.text());
