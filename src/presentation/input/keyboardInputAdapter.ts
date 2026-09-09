@@ -9,6 +9,7 @@ const KEY_COMMANDS: Readonly<Record<string, PlayerCommand>> = {
   KeyA: 'move-left',
   ArrowRight: 'move-right',
   KeyD: 'move-right',
+  KeyE: 'primary-action',
   Space: 'primary-action',
   Enter: 'primary-action',
   Escape: 'pause-menu',
