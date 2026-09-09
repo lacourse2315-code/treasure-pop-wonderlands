@@ -1,4 +1,4 @@
-(function() {
+(function () {
   // Double-load guard. Deliberately NOT "is an element with our id present":
   // agent-authored badges claim that same id, which made the platform badge
   // silently give up — leaving the project with a one-off badge, or none.
@@ -9,13 +9,13 @@
   // Check if dismissed
   try {
     if (localStorage.getItem('productos-badge-dismissed') === 'true') return;
-  } catch(e) {}
+  } catch (e) {}
 
   // Check if parent requested badge hidden via URL param
   try {
     var params = new URLSearchParams(window.location.search);
     if (params.get('productos_hide_badge') === '1') return;
-  } catch(e) {}
+  } catch (e) {}
 
   // Wait for body
   function inject() {

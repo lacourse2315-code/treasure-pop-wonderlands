@@ -171,7 +171,9 @@ export class PlayShellScene extends Phaser.Scene {
   }
 
   private createWonderWorld(): void {
-    this.add.rectangle(900, 500, WORLD_WIDTH, WORLD_HEIGHT, 0x9bdff0).setDepth(WORLD_DEPTH.background);
+    this.add
+      .rectangle(900, 500, WORLD_WIDTH, WORLD_HEIGHT, 0x9bdff0)
+      .setDepth(WORLD_DEPTH.background);
     this.add.ellipse(900, 225, 1680, 430, 0xbfe9a1).setDepth(WORLD_DEPTH.distant);
     this.add.ellipse(900, 575, 1660, 760, 0x78c97a).setDepth(WORLD_DEPTH.ground);
     this.add.ellipse(880, 590, 1220, 530, 0x8edb7e).setDepth(WORLD_DEPTH.ground + 1);
@@ -179,16 +181,28 @@ export class PlayShellScene extends Phaser.Scene {
     this.add.ellipse(930, 570, 830, 135, 0xf3e5ad).setDepth(WORLD_DEPTH.groundDetail + 1);
     this.add.ellipse(1420, 650, 410, 235, 0x58bad4).setDepth(WORLD_DEPTH.groundDetail + 2);
     this.add.ellipse(1420, 640, 345, 165, 0x80d8e7).setDepth(WORLD_DEPTH.groundDetail + 3);
-    this.add.ellipse(1420, 630, 240, 80, 0xb7f0ef).setAlpha(0.5).setDepth(WORLD_DEPTH.groundDetail + 4);
+    this.add
+      .ellipse(1420, 630, 240, 80, 0xb7f0ef)
+      .setAlpha(0.5)
+      .setDepth(WORLD_DEPTH.groundDetail + 4);
 
     this.createRuin(OBSTACLE.centerX, OBSTACLE.centerY + 80);
     const trees: [number, number, number][] = [
-      [170, 260, 1.05], [1080, 260, 0.92], [1230, 410, 1.08], [1560, 410, 0.9],
-      [260, 700, 1.12], [560, 760, 0.86], [1160, 790, 1.08], [1600, 760, 1.15],
+      [170, 260, 1.05],
+      [1080, 260, 0.92],
+      [1230, 410, 1.08],
+      [1560, 410, 0.9],
+      [260, 700, 1.12],
+      [560, 760, 0.86],
+      [1160, 790, 1.08],
+      [1600, 760, 1.15],
     ];
     trees.forEach(([x, y, scale]) => this.createTree(x, y, scale));
     const rocks: [number, number, number][] = [
-      [340, 245, 0.8], [1040, 530, 0.7], [1310, 300, 0.85], [1510, 820, 1],
+      [340, 245, 0.8],
+      [1040, 530, 0.7],
+      [1310, 300, 0.85],
+      [1510, 820, 1],
     ];
     rocks.forEach(([x, y, scale]) => this.createRock(x, y, scale));
 
@@ -199,10 +213,17 @@ export class PlayShellScene extends Phaser.Scene {
       mote.setDepth(WORLD_DEPTH.effects);
       this.ambient.push(mote);
     }
-    this.add.text(900, 82, 'WONDER WORLD', {
-      fontFamily: 'system-ui, sans-serif', fontSize: '30px', fontStyle: 'bold', color: '#ffffff',
-      stroke: '#4d6f72', strokeThickness: 7,
-    }).setOrigin(0.5).setDepth(WORLD_DEPTH.effects);
+    this.add
+      .text(900, 82, 'WONDER WORLD', {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '30px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+        stroke: '#4d6f72',
+        strokeThickness: 7,
+      })
+      .setOrigin(0.5)
+      .setDepth(WORLD_DEPTH.effects);
   }
 
   private createTree(x: number, y: number, scale: number): void {
@@ -234,9 +255,18 @@ export class PlayShellScene extends Phaser.Scene {
   }
 
   private createPlayer(): void {
-    this.playerShadow = this.add.ellipse(this.position.x, this.position.y + 22, 58, 20, 0x315e55, 0.35);
+    this.playerShadow = this.add.ellipse(
+      this.position.x,
+      this.position.y + 22,
+      58,
+      20,
+      0x315e55,
+      0.35,
+    );
     this.playerShadow.setDepth(ySortDepth(this.position.y) - 1);
-    this.player = this.add.container(this.position.x, this.position.y).setDepth(ySortDepth(this.position.y));
+    this.player = this.add
+      .container(this.position.x, this.position.y)
+      .setDepth(ySortDepth(this.position.y));
     this.player.add(this.add.circle(0, -28, 19, 0xf6c7a8));
     this.player.add(this.add.ellipse(0, 3, 42, 55, 0x6957c8));
     this.player.add(this.add.ellipse(0, 8, 28, 40, 0x8b79e5));
@@ -247,7 +277,14 @@ export class PlayShellScene extends Phaser.Scene {
 
   private createBeacon(): void {
     const depth = ySortDepth(TARGET.position.y);
-    this.beaconHalo = this.add.ellipse(TARGET.position.x, TARGET.position.y, 132, 82, 0xfff0a0, 0.28);
+    this.beaconHalo = this.add.ellipse(
+      TARGET.position.x,
+      TARGET.position.y,
+      132,
+      82,
+      0xfff0a0,
+      0.28,
+    );
     this.beaconHalo.setDepth(depth - 1);
     this.beacon = this.add.container(TARGET.position.x, TARGET.position.y).setDepth(depth);
     this.beacon.add(this.add.ellipse(0, 16, 70, 22, 0x315e55, 0.28));
@@ -256,10 +293,18 @@ export class PlayShellScene extends Phaser.Scene {
     this.beacon.add(this.add.star(0, -10, 4, 8, 18, 0xffffff, 0.75));
     this.beacon.setSize(120, 120).setInteractive({ useHandCursor: true });
     this.beacon.on('pointerdown', () => this.requestTargetInteraction());
-    this.beaconPrompt = this.add.text(TARGET.position.x, TARGET.position.y - 78, 'CLICK / TAP', {
-      fontFamily: 'system-ui, sans-serif', fontSize: '20px', fontStyle: 'bold', color: '#fffbe5',
-      stroke: '#725a17', strokeThickness: 5,
-    }).setOrigin(0.5).setDepth(depth + 2).setInteractive({ useHandCursor: true });
+    this.beaconPrompt = this.add
+      .text(TARGET.position.x, TARGET.position.y - 78, 'CLICK / TAP', {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '20px',
+        fontStyle: 'bold',
+        color: '#fffbe5',
+        stroke: '#725a17',
+        strokeThickness: 5,
+      })
+      .setOrigin(0.5)
+      .setDepth(depth + 2)
+      .setInteractive({ useHandCursor: true });
     this.beaconPrompt.on('pointerdown', () => this.requestTargetInteraction());
   }
 
@@ -271,12 +316,16 @@ export class PlayShellScene extends Phaser.Scene {
   }
 
   private collides(point: Point): boolean {
-    return Phaser.Geom.Rectangle.Contains(new Phaser.Geom.Rectangle(
-      OBSTACLE.x - PLAYER_RADIUS,
-      OBSTACLE.y - PLAYER_RADIUS,
-      OBSTACLE.width + PLAYER_RADIUS * 2,
-      OBSTACLE.height + PLAYER_RADIUS * 2,
-    ), point.x, point.y);
+    return Phaser.Geom.Rectangle.Contains(
+      new Phaser.Geom.Rectangle(
+        OBSTACLE.x - PLAYER_RADIUS,
+        OBSTACLE.y - PLAYER_RADIUS,
+        OBSTACLE.width + PLAYER_RADIUS * 2,
+        OBSTACLE.height + PLAYER_RADIUS * 2,
+      ),
+      point.x,
+      point.y,
+    );
   }
 
   private readonly onUnsafeVisibility = (): void => this.pauseForSafety();

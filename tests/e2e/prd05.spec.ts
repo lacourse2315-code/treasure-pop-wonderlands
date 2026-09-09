@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test('desktop Chromium plays Wonder World entirely with mouse click', async ({ page }, testInfo) => {
+test('desktop Chromium plays Wonder World entirely with mouse click', async ({
+  page,
+}, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-chromium');
   const errors: string[] = [];
   page.on('console', (message) => {
@@ -29,7 +31,9 @@ test('desktop Chromium plays Wonder World entirely with mouse click', async ({ p
   expect(errors).toEqual([]);
 });
 
-test('mobile WebKit plays Wonder World entirely by touch and has no joystick', async ({ page }, testInfo) => {
+test('mobile WebKit plays Wonder World entirely by touch and has no joystick', async ({
+  page,
+}, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile-landscape-webkit');
   const errors: string[] = [];
   page.on('console', (message) => {
@@ -69,7 +73,9 @@ test('E remains a secondary compatibility interaction', async ({ page }, testInf
   await page.locator('#create-profile').click();
   await page.locator('#play-profile').click();
   await page.keyboard.down('ArrowRight');
-  await page.waitForFunction(() => document.documentElement.dataset.interactionRange === 'in-range');
+  await page.waitForFunction(
+    () => document.documentElement.dataset.interactionRange === 'in-range',
+  );
   await page.keyboard.up('ArrowRight');
   await page.keyboard.press('KeyE');
   await expect(page.locator('#progress-output')).toContainText('1');
