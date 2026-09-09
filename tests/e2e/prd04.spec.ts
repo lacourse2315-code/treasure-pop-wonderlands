@@ -56,18 +56,22 @@ test('desktop Chromium proves real world bounds and obstacle collision', async (
   await page.locator('#create-profile').click();
   await page.locator('#play-profile').click();
   await expect(page.locator('#progress-output')).toContainText('0');
-  await page.keyboard.down('ArrowUp');
-  await page.waitForTimeout(1500);
-  await page.keyboard.up('ArrowUp');
+  for (let index = 0; index < 24; index += 1) {
+    await page.keyboard.down('ArrowUp');
+    await page.waitForTimeout(100);
+    await page.keyboard.up('ArrowUp');
+  }
   const topBoundY = Number(await page.locator('html').getAttribute('data-player-y'));
   expect(topBoundY).toBeGreaterThanOrEqual(24);
   expect(topBoundY).toBeLessThanOrEqual(25);
   await page.reload();
   await page.locator('#play-profile').click();
   await expect(page.locator('#progress-output')).toContainText('0');
-  await page.keyboard.down('ArrowRight');
-  await page.waitForTimeout(3000);
-  await page.keyboard.up('ArrowRight');
+  for (let index = 0; index < 24; index += 1) {
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(100);
+    await page.keyboard.up('ArrowRight');
+  }
   const collisionX = Number(await page.locator('html').getAttribute('data-player-x'));
   expect(collisionX).toBeGreaterThan(650);
   expect(collisionX).toBeLessThan(676);
