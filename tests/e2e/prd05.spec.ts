@@ -25,6 +25,7 @@ test('desktop Chromium plays Wonder World entirely with mouse click', async ({
   await page.locator('#pause-button').click();
   await expect(page.locator('#pause-panel')).toBeVisible();
   await page.locator('#resume-button').click();
+  await expect(page.locator('#pause-panel')).toBeHidden();
   await page.reload();
   await page.locator('#play-profile').click();
   await expect(page.locator('#progress-output')).toContainText('1');
@@ -53,6 +54,7 @@ test('mobile WebKit plays Wonder World entirely by touch and has no joystick', a
   await page.locator('#pause-button').tap();
   await expect(page.locator('#pause-panel')).toBeVisible();
   await page.locator('#resume-button').tap();
+  await expect(page.locator('#pause-panel')).toBeHidden();
   await page.reload();
   await page.locator('#play-profile').tap();
   await expect(page.locator('#progress-output')).toContainText('1');
@@ -72,11 +74,14 @@ test('E remains a secondary compatibility interaction', async ({ page }, testInf
   await page.locator('#profile-name').fill('Keyboard Compatibility');
   await page.locator('#create-profile').click();
   await page.locator('#play-profile').click();
-  await page.keyboard.down('ArrowRight');
-  await page.waitForFunction(
-    () => document.documentElement.dataset.interactionRange === 'in-range',
-  );
-  await page.keyboard.up('ArrowRight');
+  await expect(page.locator('#progress-output')).toContainText('0');
+  for (let index = 0; index < 12; index += 1) {
+    if ((await page.locator('html').getAttribute('data-interaction-range')) === 'in-range') break;
+    await page.keyboard.down('ArrowRight');
+    await page.waitForTimeout(100);
+    await page.keyboard.up('ArrowRight');
+  }
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-range', 'in-range');
   await page.keyboard.press('KeyE');
   await expect(page.locator('#progress-output')).toContainText('1');
 });
