@@ -1,0 +1,31 @@
+name: PRD-05 lint fix
+
+on:
+  push:
+    paths:
+      - '.github/workflows/prd05-lint-fix.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --global npm@10.9.2
+      - run: npm ci
+      - run: ./node_modules/.bin/eslint src/presentation/phaser/scenes/PlayShellScene.ts --fix
+      - run: ./node_modules/.bin/prettier --write src/presentation/phaser/scenes/PlayShellScene.ts
+      - run: git diff --check
+      - run: |
+          git config user.name 'lacourse2315-code'
+          git config user.email 'lacourse2315@gmail.com'
+          git add src/presentation/phaser/scenes/PlayShellScene.ts
+          git commit -m 'fix: resolve PRD-05 lint violations'
+          git push origin HEAD:main
