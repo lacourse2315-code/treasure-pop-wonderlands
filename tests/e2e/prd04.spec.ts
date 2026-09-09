@@ -92,7 +92,7 @@ test('Firefox launches the real Play Shell without runtime errors', async ({ pag
   expect(errors).toEqual([]);
 });
 
-test('mobile WebKit uses real touch controls for movement, interaction, pause, and persistence', async ({
+test('mobile WebKit preserves PRD-04 persistence under click tap controls', async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile-landscape-webkit');
@@ -105,21 +105,18 @@ test('mobile WebKit uses real touch controls for movement, interaction, pause, a
   await page.locator('#profile-name').fill('Touch');
   await page.locator('#create-profile').tap();
   await page.locator('#play-profile').tap();
+  await expect(page.locator('#progress-output')).toContainText('0');
   const before = Number(await page.locator('html').getAttribute('data-player-x'));
-  const right = page.getByRole('button', { name: 'Move right' });
-  for (let index = 0; index < 10; index += 1) {
-    if ((await page.locator('html').getAttribute('data-interaction-range')) === 'in-range') break;
-    await right.tap();
-    await page.waitForTimeout(100);
-  }
-  await expect(page.locator('html')).toHaveAttribute('data-interaction-range', 'in-range');
+  await expect(page.locator('.touch-dpad')).toHaveCount(0);
+  await page.locator('#game-root canvas').tap({ position: { x: 430, y: 195 } });
+  await expect(page.locator('html')).toHaveAttribute('data-last-input-mode', 'click-tap');
+  await expect(page.locator('#progress-output')).toContainText('1');
   const after = Number(await page.locator('html').getAttribute('data-player-x'));
   expect(after).toBeGreaterThan(before);
-  await page.locator('#touch-interact').tap();
-  await expect(page.locator('#progress-output')).toContainText('1');
-  await page.locator('#touch-pause').tap();
+  await page.locator('#pause-button').tap();
   await expect(page.locator('#pause-panel')).toBeVisible();
   await page.locator('#resume-button').tap();
+  await expect(page.locator('#pause-panel')).toBeHidden();
   await page.reload();
   await page.locator('#play-profile').tap();
   await expect(page.locator('#progress-output')).toContainText('1');
