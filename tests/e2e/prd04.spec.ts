@@ -55,6 +55,7 @@ test('desktop Chromium proves real world bounds and obstacle collision', async (
   await page.locator('#profile-name').fill('Collision');
   await page.locator('#create-profile').click();
   await page.locator('#play-profile').click();
+  await expect(page.locator('#progress-output')).toContainText('0');
   await page.keyboard.down('ArrowUp');
   await page.waitForTimeout(1500);
   await page.keyboard.up('ArrowUp');
@@ -63,6 +64,7 @@ test('desktop Chromium proves real world bounds and obstacle collision', async (
   expect(topBoundY).toBeLessThanOrEqual(25);
   await page.reload();
   await page.locator('#play-profile').click();
+  await expect(page.locator('#progress-output')).toContainText('0');
   await page.keyboard.down('ArrowRight');
   await page.waitForTimeout(3000);
   await page.keyboard.up('ArrowRight');
