@@ -42,34 +42,33 @@ test('desktop Chromium proves profile, movement, interaction, pause, reload, and
   expect(errors).toEqual([]);
 });
 
-test(
-  'desktop Chromium proves real world bounds and obstacle collision',
-  async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== 'desktop-chromium');
-    const errors: string[] = [];
-    page.on('console', (message) => {
-      if (message.type() === 'error') errors.push(message.text());
-    });
-    page.on('pageerror', (error) => errors.push(error.message));
-    await page.goto('/');
-    await page.locator('#profile-name').fill('Collision');
-    await page.locator('#create-profile').click();
-    await page.locator('#play-profile').click();
-    await page.keyboard.down('ArrowLeft');
-    await page.waitForTimeout(1500);
-    await page.keyboard.up('ArrowLeft');
-    const leftBoundX = Number(await page.locator('html').getAttribute('data-player-x'));
-    expect(leftBoundX).toBeGreaterThanOrEqual(24);
-    expect(leftBoundX).toBeLessThanOrEqual(25);
-    await page.keyboard.down('ArrowRight');
-    await page.waitForTimeout(3000);
-    await page.keyboard.up('ArrowRight');
-    const collisionX = Number(await page.locator('html').getAttribute('data-player-x'));
-    expect(collisionX).toBeGreaterThan(650);
-    expect(collisionX).toBeLessThan(676);
-    expect(errors).toEqual([]);
-  },
-);
+test('desktop Chromium proves real world bounds and obstacle collision', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-chromium');
+  const errors: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.push(message.text());
+  });
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto('/');
+  await page.locator('#profile-name').fill('Collision');
+  await page.locator('#create-profile').click();
+  await page.locator('#play-profile').click();
+  await page.keyboard.down('ArrowLeft');
+  await page.waitForTimeout(1500);
+  await page.keyboard.up('ArrowLeft');
+  const leftBoundX = Number(await page.locator('html').getAttribute('data-player-x'));
+  expect(leftBoundX).toBeGreaterThanOrEqual(24);
+  expect(leftBoundX).toBeLessThanOrEqual(25);
+  await page.keyboard.down('ArrowRight');
+  await page.waitForTimeout(3000);
+  await page.keyboard.up('ArrowRight');
+  const collisionX = Number(await page.locator('html').getAttribute('data-player-x'));
+  expect(collisionX).toBeGreaterThan(650);
+  expect(collisionX).toBeLessThan(676);
+  expect(errors).toEqual([]);
+});
 
 test('Firefox launches the real Play Shell without runtime errors', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-firefox');
