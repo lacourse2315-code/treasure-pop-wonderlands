@@ -11,10 +11,7 @@ test('Wonder World visual prototype is present and readable', async ({ page }, t
   await page.locator('#profile-name').fill('Visual Explorer');
   await page.locator('#create-profile').click();
   await page.locator('#play-profile').click();
-  await expect(page.locator('html')).toHaveAttribute(
-    'data-wonder-world',
-    'visual-prototype-ready',
-  );
+  await expect(page.locator('html')).toHaveAttribute('data-wonder-world', 'visual-prototype-ready');
   await expect(page.locator('canvas')).toBeVisible();
   await expect(page.locator('#progress-output')).toBeVisible();
   await page.keyboard.down('ArrowRight');
@@ -32,10 +29,7 @@ test('Wonder World keeps mobile controls and portrait gate', async ({ page }, te
   await page.locator('#profile-name').fill('Visual Touch');
   await page.locator('#create-profile').tap();
   await page.locator('#play-profile').tap();
-  await expect(page.locator('html')).toHaveAttribute(
-    'data-wonder-world',
-    'visual-prototype-ready',
-  );
+  await expect(page.locator('html')).toHaveAttribute('data-wonder-world', 'visual-prototype-ready');
   await expect(page.getByRole('button', { name: 'Move right' })).toBeVisible();
   await expect(page.locator('canvas')).toBeVisible();
 });
