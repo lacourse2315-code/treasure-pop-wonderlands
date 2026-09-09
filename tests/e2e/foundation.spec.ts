@@ -87,11 +87,16 @@ test('mobile WebKit keeps real touch and IndexedDB foundation', async ({ page },
   await page.locator('#profile-name').fill('Touch Foundation');
   await page.locator('#create-profile').tap();
   await page.locator('#play-profile').tap();
+  await expect(page.locator('#progress-output')).toContainText('0');
   const before = Number(await page.locator('html').getAttribute('data-player-x'));
-  await page.getByRole('button', { name: 'Move right' }).tap();
-  await page.waitForTimeout(120);
+  await page.locator('#game-root canvas').tap({ position: { x: 430, y: 195 } });
+  await expect(page.locator('html')).toHaveAttribute('data-last-input-mode', 'click-tap');
+  await expect(page.locator('#progress-output')).toContainText('1');
   const after = Number(await page.locator('html').getAttribute('data-player-x'));
   expect(after).toBeGreaterThan(before);
+  await page.reload();
+  await page.locator('#play-profile').tap();
+  await expect(page.locator('#progress-output')).toContainText('1');
   expect(errors).toEqual([]);
 });
 
