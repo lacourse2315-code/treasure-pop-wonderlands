@@ -122,7 +122,7 @@ export class PlayShellScene extends Phaser.Scene {
       .setDepth(WORLD_DEPTH.groundDetail + 4);
 
     this.createRuin(OBSTACLE.centerX, OBSTACLE.centerY + 80);
-    const trees: Array<[number, number, number]> = [
+    const trees: [number, number, number][] = [
       [170, 260, 1.05],
       [1080, 260, 0.92],
       [1230, 410, 1.08],
@@ -133,7 +133,7 @@ export class PlayShellScene extends Phaser.Scene {
       [1600, 760, 1.15],
     ];
     trees.forEach(([x, y, scale]) => this.createTree(x, y, scale));
-    const rocks: Array<[number, number, number]> = [
+    const rocks: [number, number, number][] = [
       [340, 245, 0.8],
       [1040, 530, 0.7],
       [1310, 300, 0.85],
