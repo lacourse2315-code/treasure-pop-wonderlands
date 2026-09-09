@@ -2,7 +2,6 @@ import type Phaser from 'phaser';
 import { getRuntime } from '../application/runtime/runtimeBridge';
 import type { ProfileId } from '../domain/profiles/profile';
 import { KeyboardInputAdapter } from '../presentation/input/keyboardInputAdapter';
-import { TouchInputAdapter } from '../presentation/input/touchInputAdapter';
 import type { PlayShellScene } from '../presentation/phaser/scenes/PlayShellScene';
 
 export function startDevelopmentHarness(game: Phaser.Game): void {
@@ -10,9 +9,7 @@ export function startDevelopmentHarness(game: Phaser.Game): void {
   if (!root) return;
   const runtime = getRuntime();
   const keyboard = new KeyboardInputAdapter(runtime.bus);
-  const touch = new TouchInputAdapter(runtime.bus, root);
   keyboard.start();
-  touch.start();
 
   const renderProfiles = (): void => {
     runtime.clearSession();
@@ -64,9 +61,10 @@ export function startDevelopmentHarness(game: Phaser.Game): void {
     const session = await runtime.startActiveSession();
     if (!session) return;
     root.dataset.screen = 'play';
-    root.innerHTML = `<section class="play-hud" aria-label="Technical play controls"><div class="play-status"><strong>PLAY SHELL — ${escapeHtml(session.profile.displayName)}</strong><output id="progress-output"></output><output id="interaction-output">Approach the gold beacon and interact.</output></div><div class="touch-controls" aria-label="Touch controls"><div class="touch-dpad"><button aria-label="Move up" data-player-command="move-up">↑</button><button aria-label="Move left" data-player-command="move-left">←</button><button aria-label="Move down" data-player-command="move-down">↓</button><button aria-label="Move right" data-player-command="move-right">→</button></div><div class="touch-actions"><button id="touch-interact" data-player-command="primary-action">Interact</button><button id="touch-pause" data-player-command="pause-menu">Pause</button></div></div><div id="pause-panel" class="pause-panel" hidden><strong>PAUSED</strong><button id="resume-button">Resume</button><button id="profiles-button">Profile select</button></div></section>`;
+    root.innerHTML = `<section class="play-hud" aria-label="Click and tap play controls"><div class="play-status"><strong>WONDER WORLD — ${escapeHtml(session.profile.displayName)}</strong><output id="progress-output"></output><output id="interaction-output">Click or tap the glowing gold discovery.</output><small>Mouse or touch is enough to play. Keyboard is optional.</small></div><button id="pause-button" class="pause-button" type="button">Pause</button><div id="pause-panel" class="pause-panel" hidden><strong>PAUSED</strong><button id="resume-button">Resume</button><button id="profiles-button">Profile select</button></div></section>`;
     updateProgress();
     playScene().resumePlay();
+    root.querySelector('#pause-button')?.addEventListener('click', () => playScene().togglePause());
     root.querySelector('#resume-button')?.addEventListener('click', () => {
       playScene().resumePlay();
       setPausePanel(false);
@@ -83,7 +81,7 @@ export function startDevelopmentHarness(game: Phaser.Game): void {
     const output = root.querySelector<HTMLOutputElement>('#progress-output');
     const progress = runtime.getSession()?.getProgress();
     if (output && progress)
-      output.value = `Technical interactions: ${String(progress.technicalInteractionsCompleted)}`;
+      output.value = `Discoveries: ${String(progress.technicalInteractionsCompleted)}`;
   };
   window.addEventListener('wonderlands:pause-changed', (event) => {
     setPausePanel((event as CustomEvent<boolean>).detail);
