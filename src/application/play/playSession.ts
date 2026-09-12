@@ -36,12 +36,18 @@ export class PlaySession {
 
   public async completeInteraction(targetId: string): Promise<TechnicalProgress> {
     if (this.progress.activatedTargetIds.includes(targetId)) return this.progress;
+    const previous = this.progress;
     this.progress = {
       technicalInteractionsCompleted: this.progress.technicalInteractionsCompleted + 1,
       activatedTargetIds: [...this.progress.activatedTargetIds, targetId],
     };
-    await this.autosave();
-    return this.progress;
+    try {
+      await this.autosave();
+      return this.progress;
+    } catch (error) {
+      this.progress = previous;
+      throw error;
+    }
   }
 
   public autosave(): Promise<void> {
