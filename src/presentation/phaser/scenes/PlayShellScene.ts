@@ -116,10 +116,13 @@ export class PlayShellScene extends Phaser.Scene {
   }
 
   private requestTargetInteraction(): void {
-    if (this.paused || !getRuntime().getSession() || this.interactionResolutionInFlight) return;
+    if (this.paused || !getRuntime().getSession() || this.interactionResolutionInFlight) {
+      return;
+    }
     document.documentElement.dataset.lastInputMode = 'click-tap';
     this.pendingInteractionTargetId = TARGET.interactionTargetId;
-    document.documentElement.dataset.pendingInteractionTarget = TARGET.interactionTargetId;
+    document.documentElement.dataset.pendingInteractionTarget =
+      TARGET.interactionTargetId;
 
     if (isInteractionInRange(this.position, TARGET)) {
       this.resolvePendingInteraction();
@@ -134,12 +137,15 @@ export class PlayShellScene extends Phaser.Scene {
   private resolvePendingInteraction(): void {
     const session = getRuntime().getSession();
     const targetId = this.pendingInteractionTargetId;
-    if (!session || !targetId || this.interactionResolutionInFlight) return;
+    if (!session || !targetId || this.interactionResolutionInFlight) {
+      return;
+    }
     if (
       targetId !== TARGET.interactionTargetId ||
       !isInteractionInRange(this.position, TARGET)
-    )
+    ) {
       return;
+    }
 
     const alreadyCompleted = session.getProgress().activatedTargetIds.includes(targetId);
     this.pendingInteractionTargetId = null;
@@ -208,7 +214,10 @@ export class PlayShellScene extends Phaser.Scene {
       return;
     }
 
-    const stepDistance = Math.min(AUTO_MOVE_SPEED * (delta / 1000), distance);
+    const stepDistance = Math.min(
+      AUTO_MOVE_SPEED * (delta / 1000),
+      distance,
+    );
     const intent = { x: dx / distance, y: dy / distance };
     const next = moveWithinBounds(this.position, intent, stepDistance, 1, {
       minX: PLAYER_RADIUS,
