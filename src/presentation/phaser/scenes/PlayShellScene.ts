@@ -3,6 +3,7 @@ import { getRuntime } from '../../../application/runtime/runtimeBridge';
 import {
   createInteractionTargetId,
   isInteractionInRange,
+  type InteractionTargetId,
 } from '../../../domain/gameplay/interaction';
 import { moveWithinBounds, type Point } from '../../../domain/gameplay/playerMovement';
 import { WORLD_DEPTH, ySortDepth } from '../../../domain/gameplay/worldDepth';
@@ -12,12 +13,12 @@ const WORLD_HEIGHT = 1000;
 const PLAYER_SPEED = 280;
 const AUTO_MOVE_SPEED = 520;
 const PLAYER_RADIUS = 24;
+const AUTO_MOVE_RANGE_MARGIN = 12;
 const TARGET = {
   interactionTargetId: createInteractionTargetId('technical-beacon-01'),
   position: { x: 430, y: 360 },
   range: 105,
 };
-const AUTO_STOP = { x: TARGET.position.x - 82, y: TARGET.position.y + 12 };
 const OBSTACLE = new Phaser.Geom.Rectangle(700, 260, 220, 260);
 
 export class PlayShellScene extends Phaser.Scene {
@@ -29,8 +30,10 @@ export class PlayShellScene extends Phaser.Scene {
   private position: Point = { x: 260, y: 360 };
   private paused = true;
   private ambient: Phaser.GameObjects.Arc[] = [];
-  private autoMoveToTarget = false;
-  private interactionPending = false;
+  private pendingInteractionTargetId: InteractionTargetId | null = null;
+  private autoMoveDestination: Point | null = null;
+  private interactionResolutionInFlight = false;
+  private interactionResolutionCount = 0;
 
   public constructor() {
     super({ key: 'PlayShellScene' });
@@ -48,6 +51,9 @@ export class PlayShellScene extends Phaser.Scene {
     document.documentElement.dataset.clickTapFirst = 'ready';
     document.documentElement.dataset.playerX = String(this.position.x);
     document.documentElement.dataset.playerY = String(this.position.y);
+    document.documentElement.dataset.autoMove = 'idle';
+    document.documentElement.dataset.interactionState = 'idle';
+    document.documentElement.dataset.interactionResolutions = '0';
     window.addEventListener('blur', this.onUnsafeVisibility);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -67,7 +73,7 @@ export class PlayShellScene extends Phaser.Scene {
     if (runtime.input.consumePause()) this.togglePause();
     if (this.paused) return;
 
-    if (this.autoMoveToTarget) this.advanceAutoMove(delta);
+    if (this.autoMoveDestination) this.advanceAutoMove(delta);
     else this.advanceOptionalKeyboardMovement(delta);
 
     const inRange = isInteractionInRange(this.position, TARGET);
@@ -76,10 +82,21 @@ export class PlayShellScene extends Phaser.Scene {
     this.beacon.setScale(1 + Math.sin(time / 220) * (inRange ? 0.035 : 0.018));
     this.beaconPrompt.setAlpha(0.72 + (Math.sin(time / 420) + 1) * 0.12);
 
-    if (runtime.input.consumePrimaryAction() && inRange) this.completeTargetInteraction();
-    if (this.autoMoveToTarget && inRange && this.interactionPending) {
-      this.autoMoveToTarget = false;
-      this.completeTargetInteraction();
+    if (this.pendingInteractionTargetId && inRange && !this.interactionResolutionInFlight) {
+      this.autoMoveDestination = null;
+      document.documentElement.dataset.autoMove = 'idle';
+      this.resolvePendingInteraction();
+      return;
+    }
+
+    if (
+      runtime.input.consumePrimaryAction() &&
+      inRange &&
+      !this.pendingInteractionTargetId &&
+      !this.interactionResolutionInFlight
+    ) {
+      this.pendingInteractionTargetId = TARGET.interactionTargetId;
+      this.resolvePendingInteraction();
     }
   }
 
@@ -99,52 +116,110 @@ export class PlayShellScene extends Phaser.Scene {
   }
 
   private requestTargetInteraction(): void {
-    if (this.paused || !getRuntime().getSession()) return;
+    if (this.paused || !getRuntime().getSession() || this.interactionResolutionInFlight) return;
     document.documentElement.dataset.lastInputMode = 'click-tap';
+    this.pendingInteractionTargetId = TARGET.interactionTargetId;
+    document.documentElement.dataset.pendingInteractionTarget = TARGET.interactionTargetId;
+
     if (isInteractionInRange(this.position, TARGET)) {
-      this.completeTargetInteraction();
+      this.resolvePendingInteraction();
       return;
     }
-    this.autoMoveToTarget = true;
-    this.interactionPending = true;
+
+    this.autoMoveDestination = this.createApproachPoint(TARGET.position, TARGET.range);
     document.documentElement.dataset.autoMove = 'active';
+    document.documentElement.dataset.interactionState = 'pending';
   }
 
-  private completeTargetInteraction(): void {
+  private resolvePendingInteraction(): void {
     const session = getRuntime().getSession();
-    if (!session) return;
-    this.interactionPending = false;
-    this.autoMoveToTarget = false;
+    const targetId = this.pendingInteractionTargetId;
+    if (!session || !targetId || this.interactionResolutionInFlight) return;
+    if (targetId !== TARGET.interactionTargetId || !isInteractionInRange(this.position, TARGET)) return;
+
+    const alreadyCompleted = session.getProgress().activatedTargetIds.includes(targetId);
+    this.pendingInteractionTargetId = null;
+    this.autoMoveDestination = null;
+    this.interactionResolutionInFlight = true;
     document.documentElement.dataset.autoMove = 'idle';
-    void session.completeInteraction(TARGET.interactionTargetId).then((progress) => {
-      document.documentElement.dataset.interactionState = 'triggered';
-      document.documentElement.dataset.technicalInteractions = String(
-        progress.technicalInteractionsCompleted,
-      );
-      window.dispatchEvent(new CustomEvent('wonderlands:progress-changed'));
-    });
+    document.documentElement.dataset.interactionState = 'resolving';
+    document.documentElement.dataset.pendingInteractionTarget = '';
+    this.beaconPrompt.setText('DISCOVERING…');
+
+    void session
+      .completeInteraction(targetId)
+      .then((progress) => {
+        this.interactionResolutionCount += 1;
+        document.documentElement.dataset.interactionState = 'triggered';
+        document.documentElement.dataset.interactionResolutions = String(
+          this.interactionResolutionCount,
+        );
+        document.documentElement.dataset.technicalInteractions = String(
+          progress.technicalInteractionsCompleted,
+        );
+        this.beaconPrompt.setText(alreadyCompleted ? 'DISCOVERED' : 'DISCOVERED!');
+        window.dispatchEvent(new CustomEvent('wonderlands:progress-changed'));
+        window.dispatchEvent(
+          new CustomEvent('wonderlands:interaction-resolved', {
+            detail: {
+              targetId,
+              alreadyCompleted,
+              technicalInteractionsCompleted: progress.technicalInteractionsCompleted,
+            },
+          }),
+        );
+      })
+      .catch(() => {
+        document.documentElement.dataset.interactionState = 'save-error';
+        this.beaconPrompt.setText('TRY AGAIN');
+        window.dispatchEvent(new CustomEvent('wonderlands:interaction-save-error'));
+      })
+      .finally(() => {
+        this.interactionResolutionInFlight = false;
+      });
+  }
+
+  private createApproachPoint(target: Point, range: number): Point {
+    const dx = this.position.x - target.x;
+    const dy = this.position.y - target.y;
+    const distance = Math.hypot(dx, dy);
+    if (distance <= range || distance === 0) return { ...this.position };
+    const desiredDistance = Math.max(0, range - AUTO_MOVE_RANGE_MARGIN);
+    return {
+      x: target.x + (dx / distance) * desiredDistance,
+      y: target.y + (dy / distance) * desiredDistance,
+    };
   }
 
   private advanceAutoMove(delta: number): void {
-    const dx = AUTO_STOP.x - this.position.x;
-    const dy = AUTO_STOP.y - this.position.y;
+    const destination = this.autoMoveDestination;
+    if (!destination) return;
+    const dx = destination.x - this.position.x;
+    const dy = destination.y - this.position.y;
     const distance = Math.hypot(dx, dy);
-    if (distance <= 4) {
-      this.position = { ...AUTO_STOP };
+    if (distance <= 1) {
+      this.position = { ...destination };
+      this.autoMoveDestination = null;
       this.syncPlayerPosition();
       return;
     }
+
+    const stepDistance = Math.min(AUTO_MOVE_SPEED * (delta / 1000), distance);
     const intent = { x: dx / distance, y: dy / distance };
-    const next = moveWithinBounds(this.position, intent, AUTO_MOVE_SPEED, delta / 1000, {
+    const next = moveWithinBounds(this.position, intent, stepDistance, 1, {
       minX: PLAYER_RADIUS,
       minY: PLAYER_RADIUS,
       maxX: WORLD_WIDTH - PLAYER_RADIUS,
       maxY: WORLD_HEIGHT - PLAYER_RADIUS,
     });
-    if (!this.collides(next)) this.position = next;
-    else {
-      this.position = { ...AUTO_STOP };
-      this.autoMoveToTarget = false;
+
+    if (!this.collides(next)) {
+      this.position = next;
+      if (stepDistance === distance) this.autoMoveDestination = null;
+    } else {
+      this.autoMoveDestination = null;
+      document.documentElement.dataset.autoMove = 'blocked';
+      document.documentElement.dataset.interactionState = 'movement-blocked';
     }
     this.syncPlayerPosition();
   }
