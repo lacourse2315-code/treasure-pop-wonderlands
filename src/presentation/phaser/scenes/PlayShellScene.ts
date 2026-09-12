@@ -135,7 +135,11 @@ export class PlayShellScene extends Phaser.Scene {
     const session = getRuntime().getSession();
     const targetId = this.pendingInteractionTargetId;
     if (!session || !targetId || this.interactionResolutionInFlight) return;
-    if (targetId !== TARGET.interactionTargetId || !isInteractionInRange(this.position, TARGET)) return;
+    if (
+      targetId !== TARGET.interactionTargetId ||
+      !isInteractionInRange(this.position, TARGET)
+    )
+      return;
 
     const alreadyCompleted = session.getProgress().activatedTargetIds.includes(targetId);
     this.pendingInteractionTargetId = null;
