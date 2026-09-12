@@ -4,6 +4,12 @@ import type { ProfileId } from '../domain/profiles/profile';
 import { KeyboardInputAdapter } from '../presentation/input/keyboardInputAdapter';
 import type { PlayShellScene } from '../presentation/phaser/scenes/PlayShellScene';
 
+interface InteractionResolvedDetail {
+  readonly targetId: string;
+  readonly alreadyCompleted: boolean;
+  readonly technicalInteractionsCompleted: number;
+}
+
 export function startDevelopmentHarness(game: Phaser.Game): void {
   const root = document.querySelector<HTMLElement>('#dev-harness');
   if (!root) return;
@@ -83,10 +89,24 @@ export function startDevelopmentHarness(game: Phaser.Game): void {
     if (output && progress)
       output.value = `Discoveries: ${String(progress.technicalInteractionsCompleted)}`;
   };
+  const updateInteractionFeedback = (detail: InteractionResolvedDetail): void => {
+    const output = root.querySelector<HTMLOutputElement>('#interaction-output');
+    if (!output) return;
+    output.value = detail.alreadyCompleted
+      ? 'Discovery already recorded — interaction confirmed.'
+      : 'Discovery recorded!';
+  };
   window.addEventListener('wonderlands:pause-changed', (event) => {
     setPausePanel((event as CustomEvent<boolean>).detail);
   });
   window.addEventListener('wonderlands:progress-changed', updateProgress);
+  window.addEventListener('wonderlands:interaction-resolved', (event) => {
+    updateInteractionFeedback((event as CustomEvent<InteractionResolvedDetail>).detail);
+  });
+  window.addEventListener('wonderlands:interaction-save-error', () => {
+    const output = root.querySelector<HTMLOutputElement>('#interaction-output');
+    if (output) output.value = 'Discovery could not be saved. Tap again to retry.';
+  });
   renderProfiles();
 }
 
