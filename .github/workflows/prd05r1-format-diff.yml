@@ -1,0 +1,32 @@
+name: PRD-05R.1 Format Diff
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  prettier-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Wonderlands
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Pin npm 10.9.2
+        run: npm install --global npm@10.9.2
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Print exact Prettier diff
+        run: |
+          npx prettier --write src/presentation/phaser/scenes/PlayShellScene.ts
+          git diff -- src/presentation/phaser/scenes/PlayShellScene.ts
