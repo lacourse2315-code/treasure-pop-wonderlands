@@ -121,8 +121,7 @@ export class PlayShellScene extends Phaser.Scene {
     }
     document.documentElement.dataset.lastInputMode = 'click-tap';
     this.pendingInteractionTargetId = TARGET.interactionTargetId;
-    document.documentElement.dataset.pendingInteractionTarget =
-      TARGET.interactionTargetId;
+    document.documentElement.dataset.pendingInteractionTarget = TARGET.interactionTargetId;
 
     if (isInteractionInRange(this.position, TARGET)) {
       this.resolvePendingInteraction();
@@ -140,10 +139,7 @@ export class PlayShellScene extends Phaser.Scene {
     if (!session || !targetId || this.interactionResolutionInFlight) {
       return;
     }
-    if (
-      targetId !== TARGET.interactionTargetId ||
-      !isInteractionInRange(this.position, TARGET)
-    ) {
+    if (targetId !== TARGET.interactionTargetId || !isInteractionInRange(this.position, TARGET)) {
       return;
     }
 
@@ -214,10 +210,7 @@ export class PlayShellScene extends Phaser.Scene {
       return;
     }
 
-    const stepDistance = Math.min(
-      AUTO_MOVE_SPEED * (delta / 1000),
-      distance,
-    );
+    const stepDistance = Math.min(AUTO_MOVE_SPEED * (delta / 1000), distance);
     const intent = { x: dx / distance, y: dy / distance };
     const next = moveWithinBounds(this.position, intent, stepDistance, 1, {
       minX: PLAYER_RADIUS,
