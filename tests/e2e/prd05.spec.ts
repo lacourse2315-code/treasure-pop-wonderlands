@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('desktop Chromium plays Wonder World entirely with mouse click', async ({
+test('desktop Chromium click out of range auto-moves and resolves interaction without second input', async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-chromium');
@@ -14,14 +14,23 @@ test('desktop Chromium plays Wonder World entirely with mouse click', async ({
   await page.locator('#create-profile').click();
   await page.locator('#play-profile').click();
   await expect(page.locator('html')).toHaveAttribute('data-click-tap-first', 'ready');
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-range', 'out-of-range');
   await expect(page.locator('canvas')).toBeVisible();
   await expect(page.locator('#progress-output')).toContainText('0');
   const before = Number(await page.locator('html').getAttribute('data-player-x'));
+
   await page.locator('canvas').click({ position: { x: 430, y: 360 } });
+
   await expect(page.locator('html')).toHaveAttribute('data-last-input-mode', 'click-tap');
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-range', 'in-range');
+  await expect(page.locator('html')).toHaveAttribute('data-auto-move', 'idle');
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-state', 'triggered');
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-resolutions', '1');
+  await expect(page.locator('#interaction-output')).toHaveText('Discovery recorded!');
   await expect(page.locator('#progress-output')).toContainText('1');
   const after = Number(await page.locator('html').getAttribute('data-player-x'));
   expect(after).toBeGreaterThan(before);
+
   await page.locator('#pause-button').click();
   await expect(page.locator('#pause-panel')).toBeVisible();
   await page.locator('#resume-button').click();
@@ -32,7 +41,34 @@ test('desktop Chromium plays Wonder World entirely with mouse click', async ({
   expect(errors).toEqual([]);
 });
 
-test('mobile WebKit plays Wonder World entirely by touch and has no joystick', async ({
+test('desktop Chromium click already in range resolves immediately without auto move', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-chromium');
+  await page.goto('/');
+  await page.locator('#profile-name').fill('Immediate Explorer');
+  await page.locator('#create-profile').click();
+  await page.locator('#play-profile').click();
+
+  await page.locator('canvas').click({ position: { x: 430, y: 360 } });
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-resolutions', '1');
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-range', 'in-range');
+  const xBeforeImmediateClick = await page.locator('html').getAttribute('data-player-x');
+  const yBeforeImmediateClick = await page.locator('html').getAttribute('data-player-y');
+
+  await page.locator('canvas').click({ position: { x: 430, y: 360 } });
+
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-resolutions', '2');
+  await expect(page.locator('html')).toHaveAttribute('data-auto-move', 'idle');
+  await expect(page.locator('#interaction-output')).toHaveText(
+    'Discovery already recorded — interaction confirmed.',
+  );
+  await expect(page.locator('html')).toHaveAttribute('data-player-x', xBeforeImmediateClick ?? '');
+  await expect(page.locator('html')).toHaveAttribute('data-player-y', yBeforeImmediateClick ?? '');
+  await expect(page.locator('#progress-output')).toContainText('1');
+});
+
+test('mobile WebKit tap out of range auto-moves and resolves interaction without joystick', async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile-landscape-webkit');
@@ -46,10 +82,18 @@ test('mobile WebKit plays Wonder World entirely by touch and has no joystick', a
   await page.locator('#create-profile').tap();
   await page.locator('#play-profile').tap();
   await expect(page.locator('html')).toHaveAttribute('data-click-tap-first', 'ready');
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-range', 'out-of-range');
   await expect(page.locator('.touch-dpad')).toHaveCount(0);
   await expect(page.locator('canvas')).toBeVisible();
+
   await page.locator('canvas').tap({ position: { x: 430, y: 195 } });
+
   await expect(page.locator('html')).toHaveAttribute('data-last-input-mode', 'click-tap');
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-range', 'in-range');
+  await expect(page.locator('html')).toHaveAttribute('data-auto-move', 'idle');
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-state', 'triggered');
+  await expect(page.locator('html')).toHaveAttribute('data-interaction-resolutions', '1');
+  await expect(page.locator('#interaction-output')).toHaveText('Discovery recorded!');
   await expect(page.locator('#progress-output')).toContainText('1');
   await page.locator('#pause-button').tap();
   await expect(page.locator('#pause-panel')).toBeVisible();
